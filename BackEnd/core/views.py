@@ -1,13 +1,13 @@
-from rest_framework import viewsets, permissions
-from .models import Filme, Genero, Favorito
-from .serializers import FilmeSerializer, GeneroSerializer, FavoritoSerializer
-from rest_framework import viewsets, permissions, filters
-from rest_framework import generics
-from .serializers import RegisterSerializer
-from django.contrib.auth.models import User
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.models import User
+from .serializers import (
+    FilmeSerializer, GeneroSerializer, FavoritoSerializer,
+    RegisterSerializer, AvaliacaoSerializer, FilmeVistoSerializer
+)
+from .models import Filme, Genero, Favorito, Avaliacao, FilmeVisto
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -22,7 +22,7 @@ class FilmeViewSet(viewsets.ModelViewSet):
     filterset_fields = ['genero']
 
     @action(detail=True, methods=['get'])
-    def recomendados(self, request, pk=None):
+    def recomendados(self, request, pk=None): # Adicionei os argumentos padrão da action
         filme_atual = self.get_object()
         recomendacoes = Filme.objects.filter(
             genero=filme_atual.genero
@@ -37,8 +37,29 @@ class GeneroViewSet(viewsets.ModelViewSet):
 
 class FavoritoViewSet(viewsets.ModelViewSet):
     serializer_class = FavoritoSerializer
-    permission_classes = [permissions.IsAuthenticated] # Exige login
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Retorna apenas os favoritos do usuário que está logado
         return Favorito.objects.filter(usuario=self.request.user)
+
+class AvaliacaoViewSet(viewsets.ModelViewSet):
+    queryset = Avaliacao.objects.all()
+    serializer_class = AvaliacaoSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
+
+class FilmeVistoViewSet(viewsets.ModelViewSet):
+    serializer_class = FilmeVistoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return FilmeVisto.objects.filter(usuario=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
