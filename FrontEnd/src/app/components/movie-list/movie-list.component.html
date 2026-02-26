@@ -1,0 +1,20 @@
+<div class="home-container py-4">
+    <div *ngFor="let group of movieGroups" class="genre-section mb-5">
+        <h2 class="genre-title ms-4 mb-3">{{ group.genero }}</h2>
+
+        <div class="movie-row">
+            <div *ngFor="let movie of group.movies" class="movie-card" [routerLink]="['/movie', movie.id]">
+                <div class="poster-wrapper shadow-lg">
+                    <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path"
+                         [alt]="movie.titulo"
+                         class="movie-poster">
+                </div>
+
+                <div class="movie-details-bottom mt-2">
+                    <p class="movie-name">{{ movie.titulo }}</p>
+                    <span class="movie-rating text-warning">⭐ {{ movie.nota }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

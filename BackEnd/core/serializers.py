@@ -1,45 +1,60 @@
 from rest_framework import serializers
 from .models import Filme, Genero, Favorito, Avaliacao, FilmeVisto
 from django.contrib.auth.models import User
-
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'password', 'email')
-
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),
-            password=validated_data['password']
-        )
-        return user
+from rest_framework.validators import UniqueValidator
 
 class GeneroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genero
-        fields = '__all__'
+        fields = ['id', 'nome']
 
 class FilmeSerializer(serializers.ModelSerializer):
     genero_detalhes = GeneroSerializer(source='genero', read_only=True)
-    media_usuarios = serializers.ReadOnlyField(source='media_avaliacoes')
+    nota = serializers.FloatField()
+    media_usuarios = serializers.ReadOnlyField()
 
     class Meta:
         model = Filme
         fields = [
             'id', 'titulo', 'sinopse', 'poster_path', 'tmdb_id',
-            'genero', 'genero_detalhes', 'media_usuarios', 'nota',
+            'genero', 'genero_detalhes', 'nota', 'media_usuarios',
             'duracao', 'classificacao', 'tagline', 'data_lancamento'
         ]
+
+class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all(), message="Este e-mail já está cadastrado.")]
+    )
+
+    password = serializers.CharField(
+            write_only=True,
+            min_length=8, # <--- Define o mínimo de caracteres aqui
+            error_messages={"min_length": "A senha deve ter pelo menos 8 caracteres."}
+        )
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'password')
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def validate_username(self, value):
+        if ' ' in value:
+            raise serializers.ValidationError("O nome de usuário não pode conter espaços.")
+        return value
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
 
 class FavoritoSerializer(serializers.ModelSerializer):
     filme_detalhes = FilmeSerializer(source='filme', read_only=True)
 
     class Meta:
         model = Favorito
-        fields = ['id', 'filme', 'filme_detalhes']
+        fields = ['id', 'filme', 'filme_detalhes', 'data_adicionado']
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -58,7 +73,4 @@ class FilmeVistoSerializer(serializers.ModelSerializer):
         model = FilmeVisto
         fields = ['id', 'filme', 'data_visto']
 
-    def create(self, validated_data):
-        user = self.context['request'].user
-        visto, created = FilmeVisto.objects.get_or_create(usuario=user, **validated_data)
-        return visto
+UserSerializer = RegisterSerializer

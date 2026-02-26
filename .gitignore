@@ -1,5 +1,18 @@
+# Python / Django
 __pycache__/
 .idea/
 .venv/
 *.pyc
 db.sqlite3
+media/
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+.vscode/
+.DS_Store
+npm-debug.log*
+
+# Ambiente
+.env
