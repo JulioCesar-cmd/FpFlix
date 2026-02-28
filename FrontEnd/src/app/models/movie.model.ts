@@ -9,8 +9,11 @@ export interface Movie {
   duracao: number;
   classificacao: string;
   tagline: string;
+  genero?: string;
   genero_detalhes?: {
     id: number;
     nome: string;
   };
+  foi_visto: boolean;
+  tipo_avaliacao: 'LIKE' | 'DISLIKE' | null;
 }

@@ -1,0 +1,60 @@
+<div class="min-vh-100" style="background-color: #141414;">
+  <nav class="navbar sticky-top shadow-sm py-3" style="background-color: rgba(20, 20, 20, 0.95); border-bottom: 2px solid #00a859; backdrop-filter: blur(10px);">
+    <div class="container-fluid px-4">
+
+      <div class="d-flex align-items-center">
+        <span class="navbar-brand mb-0 h1 fw-bold me-4" routerLink="/" style="cursor: pointer; font-size: 1.8rem; letter-spacing: 1px;">
+          <span style="color: #00a859;">FPF</span><span class="text-white">FLIX</span>
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center flex-grow-1 justify-content-end">
+
+        <div class="search-wrapper me-4 d-none d-md-block" style="width: 300px;">
+          <div class="input-group">
+            <span class="input-group-text border-0 bg-dark text-white-50" style="border-radius: 20px 0 0 20px; cursor: default;">
+              🔍
+            </span>
+            <input
+              type="text"
+              class="form-control border-0 bg-dark text-white shadow-none"
+              placeholder="Títulos, gêneros..."
+              style="border-radius: 0 20px 20px 0; font-size: 0.9rem;"
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange($event)">
+          </div>
+        </div>
+
+        <div *ngIf="!isLoggedIn" class="d-flex">
+          <button class="btn btn-outline-light btn-sm me-2 border-0 fw-bold" routerLink="/login">Entrar</button>
+          <button class="btn btn-sm px-4 fw-bold rounded-pill" routerLink="/register" style="background-color: #00a859; color: white;">
+            Cadastrar-se
+          </button>
+        </div>
+
+        <div *ngIf="isLoggedIn" class="d-flex align-items-center">
+          <div class="dropdown">
+            <div class="d-flex align-items-center" (click)="toggleMenu()" style="cursor: pointer;">
+              <div class="avatar-circle me-2 d-flex align-items-center justify-content-center"
+                   style="width: 35px; height: 35px; background-color: #00a859; border-radius: 50%; color: white; font-weight: bold;">
+                {{ username?.charAt(0) | uppercase }}
+              </div>
+              <span class="text-white-50 small" [style.transform]="isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition: transform 0.3s;">▼</span>
+            </div>
+
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg border-0 mt-3"
+                [class.show]="isMenuOpen"
+                style="background-color: #1a1a1a; position: absolute; right: 0;">
+              <li><a class="dropdown-item py-2" routerLink="/favoritos" (click)="isMenuOpen = false">❤️ Minha Lista</a></li>
+              <li><hr class="dropdown-divider bg-secondary"></li>
+              <li><a class="dropdown-item py-2 text-danger" (click)="logout(); isMenuOpen = false" style="cursor: pointer;">Sair</a></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </nav>
+
+  <router-outlet></router-outlet>
+</div>

@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Genero(models.Model):
     nome = models.CharField(max_length=100)
@@ -25,12 +24,6 @@ class Filme(models.Model):
     def __str__(self):
         return self.titulo
 
-    @property
-    def media_avaliacoes(self):
-        from django.db.models import Avg
-        media = self.avaliacoes.aggregate(Avg('nota'))['nota__avg']
-        return round(media, 1) if media else 0
-
 class Favorito(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='meus_favoritos')
     filme = models.ForeignKey(Filme, on_delete=models.CASCADE)
@@ -40,27 +33,17 @@ class Favorito(models.Model):
         unique_together = ('usuario', 'filme')
 
 class Avaliacao(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    filme = models.ForeignKey(Filme, on_delete=models.CASCADE, related_name='avaliacoes')
-    nota = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    TIPOS = (
+        ('LIKE', 'Gostei'),
+        ('DISLIKE', 'Não Gostei'),
     )
-    comentario = models.TextField(blank=True, null=True)
-    data_criacao = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='minhas_avaliacoes')
+    filme = models.ForeignKey(Filme, on_delete=models.CASCADE, related_name='avaliacoes')
+    tipo = models.CharField(max_length=10, choices=TIPOS)
+    data_avaliacao = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('usuario', 'filme')
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.filme.titulo}: {self.nota}"
-
-class FilmeVisto(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vistos')
-    filme = models.ForeignKey(Filme, on_delete=models.CASCADE)
-    data_visto = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('usuario', 'filme')
-
-    def __str__(self):
-        return f"{self.usuario.username} viu {self.filme.titulo}"
+        return f"{self.usuario.username} - {self.filme.titulo} ({self.tipo})"

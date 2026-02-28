@@ -1,0 +1,78 @@
+.auth-wrapper {
+  background-color: #000d07; // Fundo da página (verde quase preto)
+  min-height: 90vh; // Descontando a altura da navbar
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-card {
+  background-color: #002e1a; // Verde escuro FPFTech
+  border: 1px solid #004a23; // Borda sutil
+  border-radius: 12px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+
+  h2 {
+    color: #00a859; // Título em verde claro
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .form-label {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .form-control {
+    background-color: #001a0d; // Campo de input mais escuro
+    color: #ffffff;
+    border: 1px solid #004a23;
+    padding: 12px;
+    border-radius: 8px;
+
+    &:focus {
+      background-color: #001a0d;
+      color: #ffffff;
+      border-color: #00a859;
+      box-shadow: 0 0 0 0.25rem rgba(0, 168, 89, 0.25);
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .btn-fpf {
+    background-color: #00a859;
+    color: #ffffff;
+    border: none;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s;
+
+    &:hover:not(:disabled) {
+      background-color: #008f4c;
+      transform: translateY(-2px);
+    }
+
+    &:disabled {
+      background-color: #004a23;
+      opacity: 0.7;
+    }
+  }
+
+  .auth-link {
+    color: #00a859;
+    text-decoration: none;
+    font-weight: bold;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

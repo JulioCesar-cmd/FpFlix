@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Filme, Genero, Favorito, Avaliacao, FilmeVisto
+from .models import Filme, Genero, Favorito, Avaliacao
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 
@@ -8,37 +8,54 @@ class GeneroSerializer(serializers.ModelSerializer):
         model = Genero
         fields = ['id', 'nome']
 
+class AvaliacaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Avaliacao
+        fields = ['id', 'tipo', 'data_avaliacao']
+
 class FilmeSerializer(serializers.ModelSerializer):
     genero_detalhes = GeneroSerializer(source='genero', read_only=True)
     nota = serializers.FloatField()
-    media_usuarios = serializers.ReadOnlyField()
+    foi_visto = serializers.SerializerMethodField()
+    tipo_avaliacao = serializers.SerializerMethodField()
 
     class Meta:
         model = Filme
         fields = [
             'id', 'titulo', 'sinopse', 'poster_path', 'tmdb_id',
-            'genero', 'genero_detalhes', 'nota', 'media_usuarios',
-            'duracao', 'classificacao', 'tagline', 'data_lancamento'
+            'genero', 'genero_detalhes', 'nota', 'duracao',
+            'classificacao', 'tagline', 'data_lancamento',
+            'foi_visto', 'tipo_avaliacao'
         ]
+
+    def get_foi_visto(self, obj):
+        request = self.context.get('request')
+        if request and request.user and request.user.is_authenticated:
+            return Avaliacao.objects.filter(usuario=request.user, filme=obj).exists()
+        return False
+
+    def get_tipo_avaliacao(self, obj):
+        request = self.context.get('request')
+        if request and request.user and request.user.is_authenticated:
+            avaliacao = Avaliacao.objects.filter(usuario=request.user, filme=obj).first()
+            return avaliacao.tipo if avaliacao else None
+        return None
 
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all(), message="Este e-mail já está cadastrado.")]
     )
-
     password = serializers.CharField(
-            write_only=True,
-            min_length=8, # <--- Define o mínimo de caracteres aqui
-            error_messages={"min_length": "A senha deve ter pelo menos 8 caracteres."}
-        )
+        write_only=True,
+        min_length=8,
+        error_messages={"min_length": "A senha deve ter pelo menos 8 caracteres."}
+    )
 
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'password')
-        extra_kwargs = {
-            'password': {'write_only': True},
-        }
+        extra_kwargs = {'password': {'write_only': True}}
 
     def validate_username(self, value):
         if ' ' in value:
@@ -60,17 +77,3 @@ class FavoritoSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         favorito, created = Favorito.objects.get_or_create(usuario=user, **validated_data)
         return favorito
-
-class AvaliacaoSerializer(serializers.ModelSerializer):
-    usuario_nome = serializers.ReadOnlyField(source='usuario.username')
-
-    class Meta:
-        model = Avaliacao
-        fields = ['id', 'usuario_nome', 'filme', 'nota', 'comentario', 'data_criacao']
-
-class FilmeVistoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FilmeVisto
-        fields = ['id', 'filme', 'data_visto']
-
-UserSerializer = RegisterSerializer

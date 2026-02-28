@@ -1,0 +1,86 @@
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #000d07;">
+  <div class="card text-white p-5 shadow-lg" style="width: 450px; border-radius: 12px; background-color: #002e1a; border: 1px solid #004a23;">
+
+    <h2 class="mb-4 fw-bold text-center" style="color: #00a859;">Criar Conta</h2>
+
+    <div *ngIf="erroMsg" class="alert p-2 small border-0 mb-3 text-center" style="background-color: #d9534f; color: white; border-radius: 8px;">
+      ⚠️ {{ erroMsg }}
+    </div>
+
+    <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+
+      <div class="mb-3">
+        <label class="form-label text-white-50 small">Nome de usuário</label>
+        <input
+          type="text"
+          name="username"
+          class="form-control bg-dark text-white border-0 py-2 shadow-none"
+          [(ngModel)]="userData.username"
+          #userRef="ngModel"
+          pattern="^\S*$"
+          placeholder="Ex: Julio_Cesar"
+          required
+          style="border-bottom: 2px solid #004a23 !important; border-radius: 4px;"
+        >
+        <div *ngIf="userRef.errors?.['pattern']" class="text-warning small mt-1">
+          ⚠️ Use apenas letras, números, "_" ou "."
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label text-white-50 small">E-mail</label>
+        <input
+          type="email"
+          name="email"
+          class="form-control bg-dark text-white border-0 py-2 shadow-none"
+          [(ngModel)]="userData.email"
+          #emailRef="ngModel"
+          email
+          placeholder="seu@email.com"
+          required
+          style="border-bottom: 2px solid #004a23 !important; border-radius: 4px;"
+        >
+        <div *ngIf="emailRef.invalid && emailRef.touched" class="text-warning small mt-1">
+          ⚠️ Insira um e-mail válido.
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label text-white-50 small">Senha (mínimo 8 caracteres)</label>
+        <input
+          type="password"
+          name="password"
+          class="form-control bg-dark text-white border-0 py-2 shadow-none"
+          [(ngModel)]="userData.password"
+          #passRef="ngModel"
+          minlength="8"
+          placeholder="********"
+          required
+          style="border-bottom: 2px solid #004a23 !important; border-radius: 4px;"
+        >
+        <div *ngIf="passRef.invalid && (passRef.dirty || passRef.touched)" class="mt-1">
+          <small class="text-warning" *ngIf="passRef.errors?.['minlength']">
+            ⚠️ A senha precisa de pelo menos 8 caracteres.
+          </small>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn w-100 fw-bold py-2 mb-3 shadow-sm text-uppercase"
+        [disabled]="registerForm.invalid"
+        style="background-color: #00a859; color: white; transition: 0.3s;"
+      >
+        Finalizar Cadastro
+      </button>
+
+      <div class="text-center mt-3">
+        <span class="text-white-50 small">Já possui uma conta? </span>
+        <a routerLink="/login" class="fw-bold text-decoration-none small" style="color: #00a859;">
+          Fazer Login
+        </a>
+      </div>
+    </form>
+
+  </div>
+</div>

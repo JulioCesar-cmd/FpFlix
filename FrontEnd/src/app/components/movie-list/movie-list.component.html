@@ -1,20 +1,51 @@
-<div class="home-container py-4">
-    <div *ngFor="let group of movieGroups" class="genre-section mb-5">
-        <h2 class="genre-title ms-4 mb-3">{{ group.genero }}</h2>
-
-        <div class="movie-row">
-            <div *ngFor="let movie of group.movies" class="movie-card" [routerLink]="['/movie', movie.id]">
-                <div class="poster-wrapper shadow-lg">
-                    <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path"
-                         [alt]="movie.titulo"
-                         class="movie-poster">
-                </div>
-
-                <div class="movie-details-bottom mt-2">
-                    <p class="movie-name">{{ movie.titulo }}</p>
-                    <span class="movie-rating text-warning">⭐ {{ movie.nota }}</span>
-                </div>
-            </div>
-        </div>
+<div class="home-container">
+  <div *ngIf="heroMovie && !searchTerm" class="hero-banner mb-5" [routerLink]="['/movie', heroMovie.id]">
+    <div class="hero-overlay"></div>
+    <img [src]="'https://image.tmdb.org/t/p/original' + heroMovie.poster_path" [alt]="heroMovie.titulo" class="hero-img">
+    <div class="hero-content">
+      <h1 class="hero-title">{{ heroMovie.titulo }}</h1>
+      <p class="hero-description d-none d-md-block">{{ heroMovie.sinopse | slice:0:200 }}...</p>
+      <div class="hero-buttons mt-3">
+        <button class="btn btn-light btn-lg me-2">▶ Assistir</button>
+        <button class="btn btn-outline-light btn-lg">ℹ️ Mais Informações</button>
+      </div>
     </div>
+  </div>
+
+  <div *ngIf="watchedMovies.length > 0 && !searchTerm" class="genre-section mb-5">
+    <h2 class="genre-title ms-4 mb-3 text-primary">Assista Novamente</h2>
+    <div class="movie-row">
+      <div *ngFor="let movie of watchedMovies; trackBy: trackByMovieId" class="movie-card is-watched" [routerLink]="['/movie', movie.id]">
+        <div class="poster-wrapper shadow-lg">
+          <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" [alt]="movie.titulo" class="movie-poster">
+        </div>
+        <div class="movie-details-bottom mt-2">
+          <p class="movie-name">{{ movie.titulo }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngFor="let group of movieGroups" class="genre-section mb-5">
+    <h2 class="genre-title ms-4 mb-3">{{ group.genero }}</h2>
+    <div class="movie-row">
+      <div *ngFor="let movie of group.movies; trackBy: trackByMovieId" class="movie-card" [ngClass]="{'is-watched': movie.foi_visto}" [routerLink]="['/movie', movie.id]">
+        <div class="poster-wrapper shadow-lg">
+          <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" [alt]="movie.titulo" class="movie-poster">
+        </div>
+        <div class="movie-details-bottom mt-2">
+          <p class="movie-name">{{ movie.titulo }}</p>
+          <span class="movie-rating text-warning">⭐ {{ movie.nota }}</span>
+        </div>
+      </div>
+      <div class="load-more-card" (click)="loadMoreByGenre(group.genero)" *ngIf="!searchTerm && group.movies.length >= 10">
+        <div class="arrow-icon">➔</div>
+        <span>VER MAIS</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="movieGroups.length === 0" class="text-center text-white-50 mt-5">
+    <p>Nenhum filme encontrado para "{{ searchTerm }}"</p>
+  </div>
 </div>

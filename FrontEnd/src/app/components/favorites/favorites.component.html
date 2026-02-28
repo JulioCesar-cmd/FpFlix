@@ -1,0 +1,32 @@
+<div class="favorites-container py-5">
+  <div class="container">
+    <div class="d-flex align-items-center mb-5">
+      <h2 class="section-title">Meus Favoritos</h2>
+      <span class="badge ms-3 bg-green-dark" *ngIf="favorites.length > 0">
+        {{ favorites.length }} Filmes
+      </span>
+    </div>
+
+    <div class="row g-4" *ngIf="favorites.length > 0">
+      <div class="col-6 col-md-4 col-lg-2" *ngFor="let movie of favorites">
+        <div class="movie-card" [routerLink]="['/movie', movie.id]">
+          <div class="poster-wrapper shadow-lg">
+            <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path"
+                 [alt]="movie.titulo"
+                 class="movie-poster">
+          </div>
+          <div class="movie-info mt-2">
+            <p class="movie-name">{{ movie.titulo }}</p>
+            <span class="movie-rating text-warning">⭐ {{ movie.nota }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="favorites.length === 0" class="empty-state text-center py-5">
+      <h3 class="text-white">Ainda não tens favoritos ❤️</h3>
+      <p class="text-white-50">Sua lista está vazia no momento.</p>
+      <button class="btn btn-green mt-3 px-4" routerLink="/">Explorar Filmes</button>
+    </div>
+  </div>
+</div>

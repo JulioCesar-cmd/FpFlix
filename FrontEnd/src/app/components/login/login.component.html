@@ -1,0 +1,51 @@
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #000d07;">
+  <div class="card text-white p-5 shadow-lg" style="width: 420px; border-radius: 12px; background-color: #002e1a; border: 1px solid #004a23; box-shadow: 0 0 30px rgba(0, 168, 89, 0.1) !important;">
+
+    <h2 class="mb-4 text-center fw-bold" style="color: #00a859; letter-spacing: 1px;">Entrar</h2>
+
+    <div *ngIf="erroMsg" class="alert p-2 small border-0 mb-3 text-center" style="background-color: #d9534f; color: white; border-radius: 8px;">
+      ⚠️ {{ erroMsg }}
+    </div>
+
+    <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+      <div class="mb-3">
+        <label class="form-label text-white-50 small fw-bold">USUÁRIO</label>
+        <input
+          type="text"
+          name="username"
+          class="form-control bg-dark text-white border-0 py-2 shadow-none transition-all"
+          [(ngModel)]="credentials.username"
+          required
+          placeholder="Digite seu usuário"
+          style="border-bottom: 2px solid #004a23 !important; border-radius: 4px;">
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label text-white-50 small fw-bold">SENHA</label>
+        <input
+          type="password"
+          name="password"
+          class="form-control bg-dark text-white border-0 py-2 shadow-none transition-all"
+          [(ngModel)]="credentials.password"
+          required
+          placeholder="••••••••"
+          style="border-bottom: 2px solid #004a23 !important; border-radius: 4px;">
+      </div>
+
+      <button
+        type="submit"
+        class="btn w-100 fw-bold py-2 shadow transition-all login-btn"
+        [disabled]="loginForm.invalid"
+        style="background-color: #00a859; color: #000d07; border: none; border-radius: 4px;">
+        ENTRAR
+      </button>
+    </form>
+
+    <div class="mt-4 text-center">
+      <p class="text-white-50 small mb-1">Novo por aqui?</p>
+      <a routerLink="/register" class="fw-bold text-decoration-none register-link" style="color: #00a859; font-size: 0.95rem;">
+        Cadastre-se no FPF Flix.
+      </a>
+    </div>
+  </div>
+</div>

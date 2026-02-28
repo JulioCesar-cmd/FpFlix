@@ -1,0 +1,84 @@
+<div *ngIf="movie" class="detail-wrapper pb-5">
+  <div class="container mt-5 text-white">
+    <div class="row">
+      <div class="col-md-4">
+        <img [src]="'https://image.tmdb.org/t/p/w500' + movie.poster_path"
+             [alt]="movie.titulo"
+             class="img-fluid rounded shadow-lg border-green">
+      </div>
+
+      <div class="col-md-8">
+        <h1 class="display-4 fw-bold text-green">{{ movie.titulo }}</h1>
+        <p *ngIf="movie.tagline" class="text-secondary fst-italic">"{{ movie.tagline }}"</p>
+
+        <div class="d-flex gap-3 mb-4 align-items-center">
+          <span class="text-warning fw-bold">⭐ {{ movie.nota }}</span>
+          <span class="badge bg-secondary">{{ movie.classificacao || 'L' }}</span>
+          <span class="text-white-50">{{ movie.duracao }} min</span>
+          <span *ngIf="movie.genero_detalhes" class="badge bg-green-dark">
+            {{ movie.genero_detalhes.nome }}
+          </span>
+        </div>
+
+        <p class="text-secondary">
+          <strong>Idioma original:</strong> {{ movie.idioma_original | uppercase }} |
+          <strong>Lançamento:</strong> {{ movie.data_lancamento | date:'dd/MM/yyyy' }}
+        </p>
+
+        <h4 class="text-white-50 mt-4">Sinopse</h4>
+        <p class="lead" style="text-align: justify;">{{ movie.sinopse }}</p>
+
+        <div class="d-flex flex-wrap gap-3 mt-5 align-items-center">
+          <button class="btn btn-green btn-lg px-5 fw-bold">▶ Assistir</button>
+
+          <div class="btn-group shadow">
+            <button
+              type="button"
+              class="btn btn-lg px-4 transition-all"
+              [ngClass]="movie.tipo_avaliacao === 'LIKE' ? 'btn-success' : 'btn-outline-light'"
+              (click)="votar('LIKE')">
+              👍 Gostei
+            </button>
+            <button
+              type="button"
+              class="btn btn-lg px-4 transition-all"
+              [ngClass]="movie.tipo_avaliacao === 'DISLIKE' ? 'btn-danger' : 'btn-outline-light'"
+              (click)="votar('DISLIKE')">
+              👎 Não Gostei
+            </button>
+          </div>
+
+          <button
+            type="button"
+            [ngClass]="isFavorito ? 'btn btn-danger' : 'btn btn-outline-light'"
+            class="btn btn-lg px-4 fw-bold transition-all"
+            (click)="favoritarFilme()">
+            {{ isFavorito ? '❤️ Favoritado' : '🤍 Favoritar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="border-secondary my-5 opacity-25">
+
+  <div class="container-fluid related-section mt-5">
+    <h2 class="genre-title ms-4 mb-4">Filmes Recomendados</h2>
+    <div class="movie-row px-4">
+      <div *ngFor="let rel of relatedMovies"
+           class="movie-card"
+           [ngClass]="{'is-watched': rel.foi_visto}"
+           [routerLink]="['/movie', rel.id]">
+        <div class="poster-wrapper shadow-lg">
+          <img [src]="'https://image.tmdb.org/t/p/w342' + rel.poster_path"
+               [alt]="rel.titulo"
+               class="movie-poster">
+        </div>
+        <div class="movie-details-bottom mt-2">
+          <p class="movie-name-rel">{{ rel.titulo }}</p>
+          <span class="movie-rating-rel">⭐ {{ rel.nota }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
