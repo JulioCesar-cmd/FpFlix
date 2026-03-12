@@ -1,18 +1,32 @@
-# Python / Django
+# --- Python / Django ---
 __pycache__/
-.idea/
-.venv/
 *.pyc
+*.pyo
+*.pyd
+.Python
 db.sqlite3
 media/
+# Bloqueia qualquer pasta de ambiente virtual em qualquer subdiretório
+venv/
+env/
+.venv/
+*/venv/
+*/env/
+*/.venv/
+backend/venv/
 
-# Angular / Node
+# --- Angular / Node ---
 node_modules/
 dist/
 .angular/
 .vscode/
 .DS_Store
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.history/
 
-# Ambiente
+# --- Ambiente e Segredos ---
 .env
+.env.*
+!.env.example

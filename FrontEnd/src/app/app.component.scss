@@ -1,0 +1,15 @@
+.dropdown-menu {
+  z-index: 2000 !important;
+  min-width: 180px;
+  .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white !important;
+  }
+}
+
+// ✅ Garante que a animação não quebre o layout
+main {
+  display: block;
+  width: 100%;
+  position: relative;
+}

@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { trigger, transition, style, query, animate } from '@angular/animations'; // ✅ Adicionado
 import { AuthService } from './services/auth.service';
 import { MovieService } from './services/movie.service';
 
@@ -10,7 +11,19 @@ import { MovieService } from './services/movie.service';
   standalone: true,
   imports: [RouterOutlet, RouterModule, CommonModule, FormsModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  animations: [ // ✅ Definição do Fade Suave
+    trigger('routeAnimations', [
+      transition('* <=> *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(5px)' })
+        ], { optional: true }),
+        query(':enter', [
+          animate('400ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        ], { optional: true })
+      ])
+    ])
+  ]
 })
 export class AppComponent implements OnInit {
   isLoggedIn = false;
@@ -32,23 +45,29 @@ export class AppComponent implements OnInit {
     });
   }
 
+  // ✅ Prepara a rota para a animação disparar
+  prepareRoute(outlet: RouterOutlet) {
+    return outlet && outlet.activatedRouteData;
+  }
+
   checkLoginStatus() {
     this.isLoggedIn = this.authService.isLoggedIn();
     this.username = localStorage.getItem('username') || 'Usuário';
   }
 
-  toggleMenu() {
+  toggleMenu(event: Event) {
+    event.stopPropagation();
     this.isMenuOpen = !this.isMenuOpen;
   }
 
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
-    if (!event.target.closest('.dropdown')) {
+    if (!event.target.closest('.dropdown-container')) {
       this.isMenuOpen = false;
     }
   }
 
-  onSearchChange(event?: any) {
+  onSearchChange() {
     this.movieService.changeSearchTerm(this.searchTerm);
     if (this.router.url !== '/') {
       this.router.navigate(['/']);

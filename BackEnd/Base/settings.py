@@ -60,23 +60,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Base.wsgi.application'
 
-# Banco de Dados PostgreSQL
+# Banco de Dados SQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'fpf',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 # Configuração do Django REST Framework para usar JWT
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # ✅ MUDE DE 'IsAuthenticated' PARA 'AllowAny'
+        'rest_framework.permissions.AllowAny',
+    ],
 }
 
 # Configuração do Simple JWT

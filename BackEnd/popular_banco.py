@@ -1,95 +1,106 @@
 import os
 import django
 import requests
+import time
+from collections import Counter
 
+# Configuração do Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Base.settings')
 django.setup()
 
 from core.models import Filme, Genero
 
-def popular():
-    API_KEY = 'bb482b8769db20b6bad3c5187c230c2a'
-    URL_BASE = 'https://api.themoviedb.org/3'
+API_KEY = 'bb482b8769db20b6bad3c5187c230c2a'
+URL_BASE = "https://api.themoviedb.org/3"
 
-    META_TOTAL = 400
-    filmes_no_banco = Filme.objects.count()
-
-    if filmes_no_banco >= META_TOTAL:
-        print(f"😎 Meta já atingida! Total no banco: {filmes_no_banco}")
-        return
-
-    print(f"🚀 Iniciando... Banco atual: {filmes_no_banco} filmes. Meta recomendada: {META_TOTAL}")
-
-    pagina = 1
-    while Filme.objects.count() < META_TOTAL and pagina < 200:
-        print(f"📂 Analisando página {pagina}...")
+def top_generos():
+    contador = Counter()
+    for pagina in range(1, 6):
         res = requests.get(f"{URL_BASE}/movie/popular?api_key={API_KEY}&language=pt-BR&page={pagina}")
+        if res.status_code == 200:
+            filmes = res.json().get("results", [])
+            for filme in filmes:
+                for g in filme.get("genre_ids", []):
+                    contador[g] += 1
+    return [g[0] for g in contador.most_common(10)]
 
-        if res.status_code != 200: break
-        filmes_lista = res.json().get('results', [])
+def buscar_generos():
+    res = requests.get(f"{URL_BASE}/genre/movie/list?api_key={API_KEY}&language=pt-BR")
+    return res.json().get("genres", []) if res.status_code == 200 else []
 
-        for f in filmes_lista:
-            if Filme.objects.count() >= META_TOTAL: break
+def popular():
+    print("🎬 Descobrindo gêneros populares...")
+    top10_ids = top_generos()
+    generos_api = buscar_generos()
+    generos_dict = {g["id"]: g["name"] for g in generos_api}
 
-            if not all([f.get('overview'), f.get('poster_path'), f.get('release_date')]):
-                continue
+    for genero_id in top10_ids:
+        nome_genero = generos_dict.get(genero_id)
+        if not nome_genero: continue
 
-            detalhes_res = requests.get(f"{URL_BASE}/movie/{f['id']}?api_key={API_KEY}&language=pt-BR&append_to_response=release_dates")
-            if detalhes_res.status_code != 200: continue
-            detalhes = detalhes_res.json()
+        print(f"\n📂 Processando Gênero: {nome_genero}")
+        genero_obj, _ = Genero.objects.get_or_create(
+            tmdb_id=genero_id,
+            defaults={"nome": nome_genero}
+        )
 
-            runtime = detalhes.get('runtime')
-            tagline = detalhes.get('tagline')
+        pagina = 1
+        filmes_adicionados = 0
 
-            if not runtime or runtime == 0 or not tagline:
-                continue
-
-            certificacao = "L"
-            for country in detalhes.get('release_dates', {}).get('results', []):
-                if country['iso_3166_1'] == 'BR':
-                    releases = country.get('release_dates', [])
-                    if releases:
-                        certificacao = releases[0].get('certification') or "L"
-
-            # CORREÇÃO AQUI: Busca pelo tmdb_id para evitar conflito com a Primary Key (ID) do Postgres
-            gen_obj = None
-            if detalhes.get('genres'):
-                g_data = detalhes['genres'][0]
-
-                # Primeiro tentamos encontrar o gênero pelo tmdb_id
-                gen_obj = Genero.objects.filter(tmdb_id=g_data['id']).first()
-
-                # Se não existir, criamos um novo sem forçar o ID primário
-                if not gen_obj:
-                    gen_obj = Genero.objects.create(
-                        tmdb_id=g_data['id'],
-                        nome=g_data['name']
-                    )
-
-            if not gen_obj: continue
-
-            obj, created = Filme.objects.update_or_create(
-                tmdb_id=f['id'],
-                defaults={
-                    'titulo': f['title'],
-                    'sinopse': f['overview'],
-                    'poster_path': f['poster_path'],
-                    'genero': gen_obj,
-                    'nota': f.get('vote_average', 0.0),
-                    'data_lancamento': f.get('release_date'),
-                    'idioma_original': f.get('original_language', 'en'),
-                    'duracao': runtime,
-                    'classificacao': certificacao,
-                    'tagline': tagline
-                }
+        while filmes_adicionados < 25:
+            res = requests.get(
+                f"{URL_BASE}/discover/movie?api_key={API_KEY}&language=pt-BR&with_genres={genero_id}&page={pagina}&sort_by=popularity.desc"
             )
+            if res.status_code != 200: break
 
-            if created:
-                print(f"✅ [{Filme.objects.count()}/{META_TOTAL}] Novo filme: {f['title']}")
+            filmes = res.json().get("results", [])
+            for f in filmes:
+                if filmes_adicionados >= 25: break
 
-        pagina += 1
+                # Validação de campos essenciais (Adicionado backdrop_path)
+                if not f.get("poster_path") or not f.get("backdrop_path") or not f.get("overview"):
+                    continue
 
-    print(f"🏁 Finalizado! Seu catálogo agora tem {Filme.objects.count()} filmes de alta qualidade.")
+                # Se o filme já existe, apenas associamos ao novo gênero (ManyToMany)
+                if Filme.objects.filter(tmdb_id=f['id']).exists():
+                    filme_obj = Filme.objects.get(tmdb_id=f['id'])
+                    if genero_obj not in filme_obj.generos.all():
+                        filme_obj.generos.add(genero_obj)
+                        print(f"🔗 {f['title']} associado também a {nome_genero}")
+                    continue
+
+                # Buscar detalhes para pegar o Runtime e Tagline
+                detalhes_res = requests.get(f"{URL_BASE}/movie/{f['id']}?api_key={API_KEY}&language=pt-BR")
+                if detalhes_res.status_code != 200: continue
+                detalhes = detalhes_res.json()
+
+                runtime = detalhes.get("runtime")
+                if not runtime or runtime == 0: continue
+
+                # Criar novo filme
+                filme_obj = Filme.objects.create(
+                    tmdb_id=f["id"],
+                    titulo=f["title"],
+                    sinopse=f["overview"],
+                    poster_path=f["poster_path"],
+                    backdrop_path=f["backdrop_path"], # ✅ Essencial para o banner
+                    nota=f.get("vote_average", 0),
+                    data_lancamento=f.get("release_date") or None,
+                    idioma_original=f.get("original_language"),
+                    duracao=runtime,
+                    tagline=detalhes.get("tagline")
+                )
+
+                # ✅ Adicionando ao ManyToManyField
+                filme_obj.generos.add(genero_obj)
+
+                filmes_adicionados += 1
+                print(f"✅ [{filmes_adicionados}/25] {filme_obj.titulo}")
+
+            pagina += 1
+            time.sleep(0.1) # Respeitar o limite da API do lab
+
+    print(f"\n🏁 Banco populado com sucesso! Total: {Filme.objects.count()} filmes.")
 
 if __name__ == "__main__":
     popular()

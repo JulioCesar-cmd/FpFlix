@@ -1,197 +1,130 @@
+/* ✅ ANIMAÇÃO SHIMMER */
+.skeleton-loader {
+  background: #111;
+  background-image: linear-gradient(90deg, #111 0px, #1a1a1a 50%, #111 100%);
+  background-size: 200% 100%;
+  animation: shimmer-animation 1.5s infinite linear;
+}
+
+@keyframes shimmer-animation {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .home-container {
+  background-color: #000d07;
   min-height: 100vh;
-  background-color: #141414;
   color: white;
   overflow-x: hidden;
 }
 
-.hero-banner {
+/* ✅ HERO BANNER */
+.hero-container-fixed {
+  height: 80vh;
   position: relative;
-  height: 70vh;
-  width: 100%;
-  cursor: pointer;
   overflow: hidden;
+}
+
+.hero-banner {
+  position: absolute;
+  width: 100%; height: 100%;
+  cursor: pointer;
 
   .hero-img {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: cover;
-    object-position: top;
+    object-position: center 20%;
+    filter: brightness(0.6);
   }
 
   .hero-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        to bottom,
-        rgba(20, 20, 20, 0) 0%,
-        rgba(20, 20, 20, 0.8) 70%,
-        #141414 100%
-    ),
-    linear-gradient(to right, rgba(20, 20, 20, 0.7) 0%, transparent 50%);
+    top: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, transparent, #000d07);
+    z-index: 1;
   }
 
   .hero-content {
     position: absolute;
-    bottom: 10%;
-    left: 4%;
-    max-width: 40%;
+    bottom: 15%; left: 4%;
     z-index: 2;
+    max-width: 50%;
 
     .hero-title {
       font-size: 3.5rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .hero-description {
-      font-size: 1.1rem;
-      line-height: 1.4;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      font-weight: 800;
+      color: #00a859;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
     }
   }
 }
 
-.genre-section {
-  .genre-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #e5e5e5;
-    transition: color 0.3s;
-
-    &:hover {
-      color: white;
-    }
-
-    &.text-primary {
-      color: #00a859 !important;
-    }
-  }
-
-  .movie-row {
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 20px 40px;
-    gap: 15px;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
+/* ✅ TÍTULOS E CORES */
+.text-green {
+  color: #00a859 !important; /* Corrigido para remover o azul */
 }
 
+.genre-title {
+  color: #ffffff;
+  font-weight: bold;
+  border-left: 5px solid #00a859;
+  padding-left: 15px;
+  text-transform: uppercase;
+  font-size: 1.3rem;
+  margin-top: 40px;
+  margin-left: 4%;
+}
+
+.movie-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 20px 4% 40px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* ✅ CARD DNA */
 .movie-card {
   flex: 0 0 auto;
-  width: 200px;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  width: 170px;
   cursor: pointer;
+  transition: transform 0.3s ease;
 
   .poster-wrapper {
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    position: relative;
+    border: 2px solid #004a23;
+    height: 250px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 
     .movie-poster {
-      width: 100%;
-      height: 300px;
+      width: 100%; height: 100%;
       object-fit: cover;
     }
   }
 
   &:hover {
-    transform: scale(1.08);
-    z-index: 10;
-
-    .poster-wrapper {
-      box-shadow: 0 0 20px rgba(0, 168, 89, 0.6);
-    }
-  }
-
-  &.is-watched {
-    opacity: 0.4;
-    filter: grayscale(40%) brightness(0.7);
-
-    &:hover {
-      opacity: 0.9;
-      filter: grayscale(0%) brightness(1);
-    }
+    transform: translateY(-8px);
+    .poster-wrapper { border-color: #00a859; }
+    .movie-name { color: #00a859; }
   }
 
   .movie-name {
+    color: #ffffff;
     font-size: 0.9rem;
-    font-weight: 500;
-    margin: 5px 0 0;
+    font-weight: 600;
+    margin-top: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .movie-rating {
-    font-size: 0.8rem;
+    transition: color 0.3s ease;
   }
 }
 
-.load-more-card {
-  flex: 0 0 auto;
-  width: 150px;
-  height: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 8px;
-  border: 2px dashed rgba(0, 168, 89, 0.5);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  margin-left: 15px;
-  position: relative;
-  overflow: hidden;
-
-  .arrow-icon {
-    font-size: 3rem;
-    color: #00a859;
-    transition: transform 0.3s ease;
-    text-shadow: 0 0 10px rgba(0, 168, 89, 0.7);
-  }
-
-  span {
-    color: #00a859;
-    font-size: 0.9rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-    margin-top: 15px;
-    text-transform: uppercase;
-  }
-
-  &:hover {
-    background: rgba(0, 168, 89, 0.15);
-    border-color: #00a859;
-    border-style: solid;
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(0, 168, 89, 0.6);
-
-    .arrow-icon {
-      transform: translateX(8px);
-    }
-  }
-}
-
-.watched-row {
-  opacity: 0.5;
-  filter: grayscale(20%);
-
-  &:hover {
-    opacity: 1;
-    filter: none;
-    .poster-wrapper {
-      box-shadow: 0 0 20px rgba(0, 168, 89, 0.8) !important;
-    }
+.is-watched-row {
+  .movie-card {
+    opacity: 0.5;
+    &:hover { opacity: 1; }
   }
 }

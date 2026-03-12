@@ -21,12 +21,17 @@ export class MovieService {
     return this.http.get<Movie[]>(`${this.apiUrl}/`);
   }
 
+  getMoviesGrouped(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/lista_por_genero/`);
+  }
+
   getMovieById(id: number): Observable<Movie> {
     return this.http.get<Movie>(`${this.apiUrl}/${id}/`);
   }
 
-  getMoviesByGenre(genero: string): Observable<Movie[]> {
-    return this.http.get<Movie[]>(`${this.apiUrl}/?genero__nome=${genero}`);
+  // ✅ NOVO MÉTODO: Chama a Action 'recomendados' do Django
+  getRecomendados(id: number): Observable<Movie[]> {
+    return this.http.get<Movie[]>(`${this.apiUrl}/${id}/recomendados/`);
   }
 
   toggleFavorito(movieId: number): Observable<any> {

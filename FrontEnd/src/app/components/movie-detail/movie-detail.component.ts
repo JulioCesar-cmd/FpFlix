@@ -3,13 +3,22 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MovieService } from '../../services/movie.service';
 import { Movie } from '../../models/movie.model';
 import { CommonModule } from '@angular/common';
+import { trigger, transition, style, animate } from '@angular/animations'; // ✅ Importado
 
 @Component({
   selector: 'app-movie-detail',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './movie-detail.component.html',
-  styleUrls: ['./movie-detail.component.scss']
+  styleUrls: ['./movie-detail.component.scss'],
+  animations: [ // ✅ Definição da animação interna
+    trigger('fadeSlide', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('500ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
 export class MovieDetailComponent implements OnInit {
   movie?: Movie;
@@ -31,31 +40,39 @@ export class MovieDetailComponent implements OnInit {
   }
 
   loadMovieDetails(id: number): void {
+    // ✅ Resetamos para o skeleton aparecer e a animação disparar no retorno
+    this.movie = undefined;
+    this.relatedMovies = [];
+
     this.movieService.getMovieById(id).subscribe({
       next: (data: Movie) => {
         this.movie = data;
-        window.scrollTo(0, 0);
+        // Scroll suave para o topo
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         this.checkIfIsFavorito(data.id);
-        const generoParaBusca = data.genero || data.genero_detalhes?.nome;
-        if (generoParaBusca) {
-          this.loadRelatedMovies(generoParaBusca, id);
-        }
+        this.loadRelatedMovies(data.id);
       },
       error: (err: any) => console.error('Erro ao buscar detalhes:', err)
     });
   }
 
+  loadRelatedMovies(id: number): void {
+    this.movieService.getRecomendados(id).subscribe({
+      next: (movies: Movie[]) => {
+        this.relatedMovies = movies;
+      }
+    });
+  }
+
+  // ... (votar, favoritar e check continuam iguais)
   votar(tipo: 'LIKE' | 'DISLIKE'): void {
     if (this.movie) {
       this.movieService.avaliarFilme(this.movie.id, tipo).subscribe({
-        next: (res) => {
+        next: () => {
           if (this.movie) {
             this.movie.foi_visto = true;
             this.movie.tipo_avaliacao = tipo;
           }
-        },
-        error: (err) => {
-          if (err.status === 401) alert('Faça login para avaliar.');
         }
       });
     }
@@ -66,17 +83,7 @@ export class MovieDetailComponent implements OnInit {
       next: (favs: Movie[]) => {
         this.isFavorito = favs.some(m => m.id === id);
       },
-      error: (err: any) => {
-        this.isFavorito = false;
-      }
-    });
-  }
-
-  loadRelatedMovies(genero: string, currentId: number): void {
-    this.movieService.getMoviesByGenre(genero).subscribe({
-      next: (movies: Movie[]) => {
-        this.relatedMovies = movies.filter((m: Movie) => m.id !== currentId);
-      }
+      error: () => this.isFavorito = false
     });
   }
 

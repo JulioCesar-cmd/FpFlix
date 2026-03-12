@@ -6,7 +6,7 @@ from rest_framework.validators import UniqueValidator
 class GeneroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genero
-        fields = ['id', 'nome']
+        fields = ['id', 'nome', 'tmdb_id']
 
 class AvaliacaoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,7 +14,10 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
         fields = ['id', 'tipo', 'data_avaliacao']
 
 class FilmeSerializer(serializers.ModelSerializer):
-    genero_detalhes = GeneroSerializer(source='genero', read_only=True)
+    # ✅ CORREÇÃO: Agora 'generos' retorna o objeto completo diretamente.
+    # Isso resolve o erro TS2339 no Angular ao tentar acessar .nome
+    generos = GeneroSerializer(many=True, read_only=True)
+
     nota = serializers.FloatField()
     foi_visto = serializers.SerializerMethodField()
     tipo_avaliacao = serializers.SerializerMethodField()
@@ -22,9 +25,9 @@ class FilmeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Filme
         fields = [
-            'id', 'titulo', 'sinopse', 'poster_path', 'tmdb_id',
-            'genero', 'genero_detalhes', 'nota', 'duracao',
-            'classificacao', 'tagline', 'data_lancamento',
+            'id', 'titulo', 'sinopse', 'poster_path',
+            'backdrop_path', 'tmdb_id', 'generos', 'nota',
+            'duracao', 'classificacao', 'tagline', 'data_lancamento',
             'foi_visto', 'tipo_avaliacao'
         ]
 
@@ -67,6 +70,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class FavoritoSerializer(serializers.ModelSerializer):
+    # Relacionado ao ManyToMany do seu models.py
     filme_detalhes = FilmeSerializer(source='filme', read_only=True)
 
     class Meta:

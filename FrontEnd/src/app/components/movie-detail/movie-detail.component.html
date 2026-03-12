@@ -1,84 +1,214 @@
-<div *ngIf="movie" class="detail-wrapper pb-5">
-  <div class="container mt-5 text-white">
-    <div class="row">
+<div *ngIf="!movie" class="detail-wrapper pb-5">
+
+  <div class="movie-backdrop skeleton-loader" style="height: 70vh; opacity: 0.2;"></div>
+
+  <div class="container movie-content">
+
+    <div class="row align-items-center">
+
       <div class="col-md-4">
-        <img [src]="'https://image.tmdb.org/t/p/w500' + movie.poster_path"
-             [alt]="movie.titulo"
-             class="img-fluid rounded shadow-lg border-green">
+
+        <div class="skeleton-loader shadow-lg" style="height: 500px; width: 100%; border-radius: 12px;"></div>
+
       </div>
 
       <div class="col-md-8">
-        <h1 class="display-4 fw-bold text-green">{{ movie.titulo }}</h1>
-        <p *ngIf="movie.tagline" class="text-secondary fst-italic">"{{ movie.tagline }}"</p>
 
-        <div class="d-flex gap-3 mb-4 align-items-center">
-          <span class="text-warning fw-bold">⭐ {{ movie.nota }}</span>
-          <span class="badge bg-secondary">{{ movie.classificacao || 'L' }}</span>
-          <span class="text-white-50">{{ movie.duracao }} min</span>
-          <span *ngIf="movie.genero_detalhes" class="badge bg-green-dark">
-            {{ movie.genero_detalhes.nome }}
-          </span>
+        <div class="skeleton-loader mb-4" style="height: 60px; width: 60%;"></div>
+
+        <div class="skeleton-loader mb-4" style="height: 25px; width: 30%;"></div>
+
+        <div class="d-flex gap-2 mb-5">
+
+          <div class="skeleton-loader" style="height: 35px; width: 80px;"></div>
+
+          <div class="skeleton-loader" style="height: 35px; width: 80px;"></div>
+
         </div>
 
-        <p class="text-secondary">
-          <strong>Idioma original:</strong> {{ movie.idioma_original | uppercase }} |
-          <strong>Lançamento:</strong> {{ movie.data_lancamento | date:'dd/MM/yyyy' }}
+        <div class="skeleton-loader" style="height: 150px; width: 100%;"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div *ngIf="movie" class="detail-wrapper pb-5" [@fadeSlide]>
+
+
+  <div class="movie-backdrop" [style.background-image]="'url(https://image.tmdb.org/t/p/original' + movie.backdrop_path + ')'">
+
+    <div class="backdrop-overlay"></div>
+
+  </div>
+
+
+  <div class="container movie-content text-white">
+
+    <div class="row align-items-center">
+
+      <div class="col-md-4 position-relative">
+
+        <img [src]="'https://image.tmdb.org/t/p/w500' + movie.poster_path"
+
+             [alt]="movie.titulo"
+
+             class="img-fluid rounded shadow-lg border-green main-poster">
+
+      </div>
+
+
+      <div class="col-md-8">
+
+        <h1 class="display-3 fw-bold text-green mb-0">{{ movie.titulo }}</h1>
+
+        <p *ngIf="movie.tagline" class="text-secondary fst-italic fs-5 mb-4">"{{ movie.tagline }}"</p>
+
+
+        <div class="d-flex flex-wrap gap-3 mb-4 align-items-center info-badges">
+
+          <span class="text-warning fw-bold fs-5">⭐ {{ movie.nota }}</span>
+
+          <span class="badge bg-secondary px-3 py-2">{{ movie.classificacao || 'L' }}</span>
+
+          <span class="text-white-50">{{ movie.duracao }} min</span>
+
+
+          <span *ngFor="let g of movie.generos" class="badge bg-green-dark px-3 py-2 me-1">
+
+{{ $any(g).nome }}
+
+</span>
+
+        </div>
+
+
+        <p class="text-secondary small">
+
+          <strong>IDIOMA ORIGINAL:</strong> {{ movie.idioma_original | uppercase }} |
+
+          <strong>LANÇAMENTO:</strong> {{ movie.data_lancamento | date:'dd/MM/yyyy' }}
+
         </p>
 
-        <h4 class="text-white-50 mt-4">Sinopse</h4>
-        <p class="lead" style="text-align: justify;">{{ movie.sinopse }}</p>
 
-        <div class="d-flex flex-wrap gap-3 mt-5 align-items-center">
-          <button class="btn btn-green btn-lg px-5 fw-bold">▶ Assistir</button>
+        <h4 class="text-white-50 mt-4 fw-bold">SINOPSE</h4>
 
-          <div class="btn-group shadow">
+        <p class="lead" style="text-align: justify; color: #e5e5e5;">{{ movie.sinopse }}</p>
+
+
+        <div class="d-flex flex-wrap gap-3 mt-5 align-items-center action-buttons">
+
+          <button class="btn btn-green btn-lg px-5 fw-bold shadow-lg">▶ ASSISTIR</button>
+
+
+          <div class="btn-group shadow-lg">
+
             <button
+
               type="button"
+
               class="btn btn-lg px-4 transition-all"
+
               [ngClass]="movie.tipo_avaliacao === 'LIKE' ? 'btn-success' : 'btn-outline-light'"
+
               (click)="votar('LIKE')">
-              👍 Gostei
+
+              👍
+
             </button>
+
             <button
+
               type="button"
+
               class="btn btn-lg px-4 transition-all"
+
               [ngClass]="movie.tipo_avaliacao === 'DISLIKE' ? 'btn-danger' : 'btn-outline-light'"
+
               (click)="votar('DISLIKE')">
-              👎 Não Gostei
+
+              👎
+
             </button>
+
           </div>
 
+
           <button
+
             type="button"
+
             [ngClass]="isFavorito ? 'btn btn-danger' : 'btn btn-outline-light'"
-            class="btn btn-lg px-4 fw-bold transition-all"
+
+            class="btn btn-lg px-4 fw-bold transition-all shadow-lg"
+
             (click)="favoritarFilme()">
-            {{ isFavorito ? '❤️ Favoritado' : '🤍 Favoritar' }}
+
+            {{ isFavorito ? '❤️ FAVORITOS' : '🤍 FAVORITO' }}
+
           </button>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
+
 
   <hr class="border-secondary my-5 opacity-25">
 
+
   <div class="container-fluid related-section mt-5">
-    <h2 class="genre-title ms-4 mb-4">Filmes Recomendados</h2>
-    <div class="movie-row px-4">
-      <div *ngFor="let rel of relatedMovies"
-           class="movie-card"
-           [ngClass]="{'is-watched': rel.foi_visto}"
-           [routerLink]="['/movie', rel.id]">
-        <div class="poster-wrapper shadow-lg">
-          <img [src]="'https://image.tmdb.org/t/p/w342' + rel.poster_path"
-               [alt]="rel.titulo"
-               class="movie-poster">
-        </div>
-        <div class="movie-details-bottom mt-2">
-          <p class="movie-name-rel">{{ rel.titulo }}</p>
-          <span class="movie-rating-rel">⭐ {{ rel.nota }}</span>
-        </div>
-      </div>
+
+    <h2 class="genre-title ms-4 mb-4 fw-bold">Filmes que talvez você goste</h2>
+
+
+    <div class="movie-row px-4 d-flex gap-3 overflow-hidden" *ngIf="relatedMovies.length === 0">
+
+      <div *ngFor="let card of [1, 2, 3, 4, 5, 6]" class="skeleton-loader" style="min-width: 200px; height: 300px;"></div>
+
     </div>
+
+
+    <div class="movie-row px-4" *ngIf="relatedMovies.length > 0" [@fadeSlide]>
+
+      <div *ngFor="let rel of relatedMovies"
+
+           class="movie-card"
+
+           [ngClass]="{'is-watched': rel.foi_visto}"
+
+           [routerLink]="['/movie', rel.id]">
+
+        <div class="poster-wrapper shadow-lg">
+
+          <img [src]="'https://image.tmdb.org/t/p/w342' + rel.poster_path"
+
+               [alt]="rel.titulo"
+
+               class="movie-poster">
+
+        </div>
+
+        <div class="movie-details-bottom mt-2">
+
+          <p class="movie-name-rel">{{ rel.titulo }}</p>
+
+          <span class="movie-rating-rel text-warning">⭐ {{ rel.nota }}</span>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
+
 </div>

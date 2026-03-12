@@ -1,5 +1,5 @@
 <div class="min-vh-100" style="background-color: #141414;">
-  <nav class="navbar sticky-top shadow-sm py-3" style="background-color: rgba(20, 20, 20, 0.95); border-bottom: 2px solid #00a859; backdrop-filter: blur(10px);">
+  <nav class="navbar sticky-top shadow-sm py-3" style="background-color: rgba(20, 20, 20, 0.95); border-bottom: 2px solid #00a859; backdrop-filter: blur(10px); z-index: 1000;">
     <div class="container-fluid px-4">
 
       <div class="d-flex align-items-center">
@@ -21,8 +21,12 @@
               placeholder="Títulos, gêneros..."
               style="border-radius: 0 20px 20px 0; font-size: 0.9rem;"
               [(ngModel)]="searchTerm"
-              (input)="onSearchChange($event)">
+              (input)="onSearchChange()">
           </div>
+        </div>
+
+        <div *ngIf="isLoggedIn" class="d-none d-lg-flex me-4">
+          <a class="nav-link text-white-50 small fw-bold" routerLink="/" routerLinkActive="text-white">Início</a>
         </div>
 
         <div *ngIf="!isLoggedIn" class="d-flex">
@@ -32,29 +36,38 @@
           </button>
         </div>
 
-        <div *ngIf="isLoggedIn" class="d-flex align-items-center">
-          <div class="dropdown">
-            <div class="d-flex align-items-center" (click)="toggleMenu()" style="cursor: pointer;">
-              <div class="avatar-circle me-2 d-flex align-items-center justify-content-center"
-                   style="width: 35px; height: 35px; background-color: #00a859; border-radius: 50%; color: white; font-weight: bold;">
-                {{ username?.charAt(0) | uppercase }}
-              </div>
-              <span class="text-white-50 small" [style.transform]="isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition: transform 0.3s;">▼</span>
+        <div *ngIf="isLoggedIn" class="d-flex align-items-center position-relative dropdown-container">
+          <div class="d-flex align-items-center" (click)="toggleMenu($event)" style="cursor: pointer;">
+            <div class="avatar-circle me-2 d-flex align-items-center justify-content-center shadow"
+                 style="width: 35px; height: 35px; background-color: #00a859; border-radius: 50%; color: white; font-weight: bold; border: 2px solid rgba(255,255,255,0.2);">
+              {{ username.charAt(0) | uppercase }}
             </div>
-
-            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg border-0 mt-3"
-                [class.show]="isMenuOpen"
-                style="background-color: #1a1a1a; position: absolute; right: 0;">
-              <li><a class="dropdown-item py-2" routerLink="/favoritos" (click)="isMenuOpen = false">❤️ Minha Lista</a></li>
-              <li><hr class="dropdown-divider bg-secondary"></li>
-              <li><a class="dropdown-item py-2 text-danger" (click)="logout(); isMenuOpen = false" style="cursor: pointer;">Sair</a></li>
-            </ul>
+            <span class="text-white-50 small arrow-icon" [style.transform]="isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition: transform 0.3s; display: inline-block;">▼</span>
           </div>
+
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg border-0 mt-3 p-2"
+              [class.show]="isMenuOpen"
+              [style.display]="isMenuOpen ? 'block' : 'none'"
+              style="background-color: #1a1a1a; position: absolute; top: 100%; right: 0; min-width: 180px; border-radius: 8px; z-index: 1100;">
+            <li>
+              <a class="dropdown-item py-2 rounded d-flex align-items-center" routerLink="/favoritos" (click)="isMenuOpen = false">
+                <i class="bi bi-heart-fill me-2 text-danger"></i> Minha Lista
+              </a>
+            </li>
+            <li><hr class="dropdown-divider bg-secondary opacity-25"></li>
+            <li>
+              <a class="dropdown-item py-2 text-danger rounded d-flex align-items-center" (click)="logout(); isMenuOpen = false" style="cursor: pointer;">
+                <i class="bi bi-box-arrow-right me-2"></i> Sair do FPF FLIX
+              </a>
+            </li>
+          </ul>
         </div>
 
       </div>
     </div>
   </nav>
 
-  <router-outlet></router-outlet>
+  <main [@routeAnimations]="prepareRoute(outlet)">
+    <router-outlet #outlet="outlet"></router-outlet>
+  </main>
 </div>

@@ -1,35 +1,41 @@
 <div class="home-container">
-  <div *ngIf="heroMovie && !searchTerm" class="hero-banner mb-5" [routerLink]="['/movie', heroMovie.id]">
-    <div class="hero-overlay"></div>
-    <img [src]="'https://image.tmdb.org/t/p/original' + heroMovie.poster_path" [alt]="heroMovie.titulo" class="hero-img">
-    <div class="hero-content">
-      <h1 class="hero-title">{{ heroMovie.titulo }}</h1>
-      <p class="hero-description d-none d-md-block">{{ heroMovie.sinopse | slice:0:200 }}...</p>
-      <div class="hero-buttons mt-3">
-        <button class="btn btn-light btn-lg me-2">▶ Assistir</button>
-        <button class="btn btn-outline-light btn-lg">ℹ️ Mais Informações</button>
+
+  <div class="hero-container-fixed" *ngIf="!heroMovie && !searchTerm">
+    <div class="skeleton-loader w-100" style="height: 100%; opacity: 0.3;"></div>
+  </div>
+
+  <div class="hero-container-fixed" *ngIf="heroMovie && !searchTerm">
+    <div *ngFor="let movie of [heroMovie]"
+         [@heroFade]="movie?.id"
+         class="hero-banner"
+         [routerLink]="['/movie', movie?.id]">
+      <div class="hero-overlay"></div>
+      <img *ngIf="movie?.backdrop_path"
+           [src]="'https://image.tmdb.org/t/p/original' + movie?.backdrop_path"
+           [alt]="movie?.titulo"
+           class="hero-img">
+      <div class="hero-content">
+        <h1 class="hero-title">{{ movie?.titulo }}</h1>
+        <p class="hero-tagline text-warning mb-2" *ngIf="movie?.tagline">
+          "{{ movie?.tagline }}"
+        </p>
+        <p class="hero-description d-none d-md-block">
+          {{ movie?.sinopse | slice:0:200 }}...
+        </p>
+        <div class="hero-buttons mt-3">
+          <button class="btn btn-light btn-lg me-2 fw-bold">▶ Assistir</button>
+          <button class="btn btn-outline-light btn-lg fw-bold">ℹ️ Mais Informações</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div *ngIf="watchedMovies.length > 0 && !searchTerm" class="genre-section mb-5">
-    <h2 class="genre-title ms-4 mb-3 text-primary">Assista Novamente</h2>
-    <div class="movie-row">
-      <div *ngFor="let movie of watchedMovies; trackBy: trackByMovieId" class="movie-card is-watched" [routerLink]="['/movie', movie.id]">
-        <div class="poster-wrapper shadow-lg">
-          <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" [alt]="movie.titulo" class="movie-poster">
-        </div>
-        <div class="movie-details-bottom mt-2">
-          <p class="movie-name">{{ movie.titulo }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div *ngFor="let group of movieGroups" class="genre-section mb-5">
-    <h2 class="genre-title ms-4 mb-3">{{ group.genero }}</h2>
-    <div class="movie-row">
-      <div *ngFor="let movie of group.movies; trackBy: trackByMovieId" class="movie-card" [ngClass]="{'is-watched': movie.foi_visto}" [routerLink]="['/movie', movie.id]">
+  <div *ngIf="searchTerm" class="search-results-container px-4 mt-5">
+    <h2 class="genre-title mb-4">Resultados para: "{{ searchTerm }}"</h2>
+    <div class="d-flex flex-wrap gap-3 justify-content-start">
+      <div *ngFor="let movie of allMoviesResults; trackBy: trackByMovieId"
+           class="movie-card"
+           [routerLink]="['/movie', movie.id]">
         <div class="poster-wrapper shadow-lg">
           <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" [alt]="movie.titulo" class="movie-poster">
         </div>
@@ -38,14 +44,54 @@
           <span class="movie-rating text-warning">⭐ {{ movie.nota }}</span>
         </div>
       </div>
-      <div class="load-more-card" (click)="loadMoreByGenre(group.genero)" *ngIf="!searchTerm && group.movies.length >= 10">
-        <div class="arrow-icon">➔</div>
-        <span>VER MAIS</span>
+    </div>
+  </div>
+
+  <div *ngIf="movieGroups.length === 0 && !searchTerm" class="mt-5">
+    <div *ngFor="let row of [1, 2, 3]" class="genre-section mb-5">
+      <div class="skeleton-loader ms-4 mb-3" style="width: 200px; height: 30px;"></div>
+      <div class="movie-row px-4 d-flex gap-3 overflow-hidden">
+        <div *ngFor="let card of [1, 2, 3, 4, 5, 6]"
+             class="skeleton-loader"
+             style="min-width: 180px; height: 270px; border-radius: 8px;">
+        </div>
       </div>
     </div>
   </div>
 
-  <div *ngIf="movieGroups.length === 0" class="text-center text-white-50 mt-5">
-    <p>Nenhum filme encontrado para "{{ searchTerm }}"</p>
+  <div *ngIf="!searchTerm && movieGroups.length > 0">
+
+    <div *ngIf="watchedMovies.length > 0" class="genre-section mb-5 mt-n5 is-watched-row">
+      <h2 class="genre-title ms-4 mb-3 text-green">Assista Novamente</h2>
+      <div class="movie-row">
+        <div *ngFor="let movie of watchedMovies; trackBy: trackByMovieId"
+             class="movie-card"
+             [routerLink]="['/movie', movie.id]">
+          <div class="poster-wrapper shadow-lg">
+            <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" [alt]="movie.titulo" class="movie-poster">
+          </div>
+          <div class="movie-details-bottom mt-2">
+            <p class="movie-name">{{ movie.titulo }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngFor="let group of movieGroups" class="genre-section mb-5">
+      <h2 class="genre-title ms-4 mb-3">{{ group.nome_genero }}</h2>
+      <div class="movie-row">
+        <div *ngFor="let movie of group.filmes; trackBy: trackByMovieId"
+             class="movie-card"
+             [routerLink]="['/movie', movie.id]">
+          <div class="poster-wrapper shadow-lg">
+            <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" [alt]="movie.titulo" class="movie-poster">
+          </div>
+          <div class="movie-details-bottom mt-2">
+            <p class="movie-name">{{ movie.titulo }}</p>
+            <span class="movie-rating text-warning">⭐ {{ movie.nota }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
