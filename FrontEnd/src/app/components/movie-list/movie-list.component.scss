@@ -18,17 +18,59 @@
   overflow-x: hidden;
 }
 
-/* ✅ HERO BANNER */
+/* ✅ HERO BANNER FIXED */
 .hero-container-fixed {
   height: 80vh;
   position: relative;
   overflow: hidden;
+  background: #000;
+
+  .hero-dots {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 30;
+    align-items: center;
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &.active {
+        width: 45px;
+        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 0.15);
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 0; top: 0; height: 100%; width: 100%;
+          background-color: #00a859;
+          transform-origin: left;
+          animation: progress-smooth 8s linear forwards;
+        }
+      }
+    }
+  }
+
+  @keyframes progress-smooth {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
 }
 
 .hero-banner {
   position: absolute;
   width: 100%; height: 100%;
-  cursor: pointer;
 
   .hero-img {
     width: 100%; height: 100%;
@@ -41,55 +83,68 @@
     position: absolute;
     top: 0; width: 100%; height: 100%;
     background: linear-gradient(to bottom, transparent, #000d07);
-    z-index: 1;
+    z-index: 10;
+    cursor: pointer;
   }
 
   .hero-content {
     position: absolute;
-    bottom: 15%; left: 4%;
-    z-index: 2;
-    max-width: 50%;
+    bottom: 18%; left: 4%;
+    z-index: 20;
+    max-width: 55%;
 
     .hero-title {
-      font-size: 3.5rem;
+      font-size: 4rem;
       font-weight: 800;
       color: #00a859;
-      text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+      text-shadow: 2px 2px 15px rgba(0,0,0,0.9);
+      margin-bottom: 15px;
     }
   }
 }
 
-/* ✅ TÍTULOS E CORES */
-.text-green {
-  color: #00a859 !important; /* Corrigido para remover o azul */
-}
-
+/* ✅ TÍTULOS DE SEÇÃO */
 .genre-title {
   color: #ffffff;
   font-weight: bold;
   border-left: 5px solid #00a859;
   padding-left: 15px;
   text-transform: uppercase;
-  font-size: 1.3rem;
-  margin-top: 40px;
   margin-left: 4%;
+  margin-top: 40px;
+
+  i { vertical-align: middle; }
 }
 
+/* ✅ FILEIRAS DE FILMES */
 .movie-row {
   display: flex;
-  overflow-x: auto;
   gap: 20px;
-  padding: 20px 4% 40px;
+  overflow-x: auto;
+  padding: 40px 4% 50px;
+  margin-top: -20px;
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
 
-/* ✅ CARD DNA */
+/* ✅ CARD COM EFEITO ZOOM */
 .movie-card {
   flex: 0 0 auto;
   width: 170px;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+
+  /* ✅ OPACIDADE REDUZIDA NA 4ª FILEIRA */
+  &.watched-card {
+    opacity: 0.5;
+    filter: grayscale(20%);
+    &:hover {
+      opacity: 1;
+      filter: grayscale(0%);
+    }
+  }
 
   .poster-wrapper {
     border-radius: 12px;
@@ -97,17 +152,31 @@
     border: 2px solid #004a23;
     height: 250px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    transition: all 0.45s ease;
 
     .movie-poster {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
+      transition: transform 0.6s ease;
     }
   }
 
   &:hover {
-    transform: translateY(-8px);
-    .poster-wrapper { border-color: #00a859; }
-    .movie-name { color: #00a859; }
+    transform: scale(1.15) translateY(-10px);
+    z-index: 100;
+
+    .poster-wrapper {
+      border-color: #00a859;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+      .movie-poster { filter: brightness(1.1); }
+    }
+
+    .movie-name {
+      color: #00a859;
+      white-space: normal;
+      font-weight: 700;
+    }
   }
 
   .movie-name {
@@ -118,13 +187,21 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    text-align: center;
   }
 }
 
-.is-watched-row {
-  .movie-card {
-    opacity: 0.5;
-    &:hover { opacity: 1; }
+/* ✅ RESULTADOS DA BUSCA */
+.search-results-container {
+  padding-top: 100px;
+  min-height: 80vh;
+  .results-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    width: 100%;
+    padding-bottom: 50px;
   }
 }

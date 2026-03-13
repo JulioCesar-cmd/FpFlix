@@ -1,3 +1,4 @@
+/* --- SKELETON ANIMATION --- */
 .skeleton-loader {
   background: #111;
   background-image: linear-gradient(90deg, #111 0px, #1a1a1a 50%, #111 100%);
@@ -10,6 +11,7 @@
   100% { background-position: 200% 0; }
 }
 
+/* --- WRAPPER E BACKDROP --- */
 .detail-wrapper {
   background-color: #000d07;
   min-height: 100vh;
@@ -30,6 +32,7 @@
 
 .container.movie-content { position: relative; z-index: 2; padding-top: 40px; }
 
+/* --- CORES E BORDAS --- */
 .text-green { color: #00a859 !important; }
 .bg-green-dark { background-color: #004a23 !important; color: white; }
 
@@ -37,43 +40,47 @@
   border: 3px solid #004a23;
   transition: all 0.3s ease;
   border-radius: 12px;
-  &:hover { border-color: #00a859; }
+  &:hover { border-color: #00a859; box-shadow: 0 0 20px rgba(0, 168, 89, 0.2); }
 }
 
 .btn-green {
   background-color: #00a859; color: #000d07; font-weight: bold;
-  &:hover { background-color: #008f4c; color: white !important; }
+  border: none;
+  &:hover { background-color: #008f4c; color: white !important; transform: scale(1.05); }
 }
 
-/* ✅ ESTILOS DE BOTÕES CIRCULARES E ATIVOS */
-.btn-circle-action {
-  width: 54px; height: 54px; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05); border: 2px solid #1a1a1a;
-  color: white; display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; transition: all 0.3s ease; cursor: pointer;
+/* --- BOTÕES DE AÇÃO --- */
+.transition-all { transition: all 0.3s ease; }
 
-  &:hover { background: rgba(255, 255, 255, 0.1); border-color: #ffffff; }
+.btn-outline-light:hover { background: rgba(255,255,255,0.1); color: white; }
+
+/* --- ✅ SEÇÃO DO TRAILER (70% CENTRALIZADO) --- */
+.trailer-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
 }
 
-.like-ativo {
-  background-color: #00a859 !important; border-color: #00ffa3 !important;
-  box-shadow: 0 0 15px rgba(0, 168, 89, 0.4);
+.video-wrapper-70 {
+  width: 70%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #004a23;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.3s ease;
+
+  &:hover { border-color: #00a859; }
+
+  iframe { width: 100%; height: 100%; display: block; }
 }
 
-.dislike-ativo {
-  background-color: #ff4d4d !important; border-color: #ff1a1a !important;
-  box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
-}
-
-.btn-danger {
-  background-color: #ff4d4d !important; border: none !important;
-  &:hover { background-color: #ff1a1a !important; }
-}
-
-/* RECOMENDADOS */
+/* --- RECOMENDADOS --- */
 .genre-title {
   color: #ffffff; font-weight: bold; border-left: 5px solid #00a859;
-  padding-left: 15px; text-transform: uppercase; margin-top: 40px;
+  padding-left: 15px; text-transform: uppercase;
 }
 
 .movie-row {
@@ -89,10 +96,18 @@
 
 .poster-wrapper {
   border-radius: 8px; overflow: hidden; border: 2px solid #1a1a1a; height: 250px;
+  transition: border-color 0.3s ease;
   img { width: 100%; height: 100%; object-fit: cover; }
 }
 
 .movie-name-rel {
   color: #ffffff; font-size: 0.9rem; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+}
+
+/* RESPONSIVIDADE MOBILE */
+@media (max-width: 768px) {
+  .video-wrapper-70 { width: 95%; }
+  .display-3 { font-size: 2.5rem; }
+  .main-poster { margin-bottom: 20px; }
 }

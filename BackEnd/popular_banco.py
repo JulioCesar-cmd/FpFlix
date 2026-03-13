@@ -34,6 +34,9 @@ def popular():
     generos_api = buscar_generos()
     generos_dict = {g["id"]: g["name"] for g in generos_api}
 
+    # Meta aumentada: 25 antigos + 15 novos = 40
+    META_POR_GENERO = 40
+
     for genero_id in top10_ids:
         nome_genero = generos_dict.get(genero_id)
         if not nome_genero: continue
@@ -45,28 +48,32 @@ def popular():
         )
 
         pagina = 1
-        filmes_adicionados = 0
+        processados_neste_genero = 0
 
-        while filmes_adicionados < 25:
+        while processados_neste_genero < META_POR_GENERO:
             res = requests.get(
                 f"{URL_BASE}/discover/movie?api_key={API_KEY}&language=pt-BR&with_genres={genero_id}&page={pagina}&sort_by=popularity.desc"
             )
             if res.status_code != 200: break
 
             filmes = res.json().get("results", [])
-            for f in filmes:
-                if filmes_adicionados >= 25: break
+            if not filmes: break # Fim das páginas disponíveis
 
-                # Validação de campos essenciais (Adicionado backdrop_path)
+            for f in filmes:
+                if processados_neste_genero >= META_POR_GENERO: break
+
+                # Validação de campos essenciais
                 if not f.get("poster_path") or not f.get("backdrop_path") or not f.get("overview"):
                     continue
 
-                # Se o filme já existe, apenas associamos ao novo gênero (ManyToMany)
+                # Se o filme já existe, associamos ao gênero e contamos como processado
                 if Filme.objects.filter(tmdb_id=f['id']).exists():
                     filme_obj = Filme.objects.get(tmdb_id=f['id'])
                     if genero_obj not in filme_obj.generos.all():
                         filme_obj.generos.add(genero_obj)
-                        print(f"🔗 {f['title']} associado também a {nome_genero}")
+                        print(f"🔗 {f['title']} vinculado a {nome_genero}")
+
+                    processados_neste_genero += 1
                     continue
 
                 # Buscar detalhes para pegar o Runtime e Tagline
@@ -83,7 +90,7 @@ def popular():
                     titulo=f["title"],
                     sinopse=f["overview"],
                     poster_path=f["poster_path"],
-                    backdrop_path=f["backdrop_path"], # ✅ Essencial para o banner
+                    backdrop_path=f["backdrop_path"],
                     nota=f.get("vote_average", 0),
                     data_lancamento=f.get("release_date") or None,
                     idioma_original=f.get("original_language"),
@@ -91,16 +98,14 @@ def popular():
                     tagline=detalhes.get("tagline")
                 )
 
-                # ✅ Adicionando ao ManyToManyField
                 filme_obj.generos.add(genero_obj)
-
-                filmes_adicionados += 1
-                print(f"✅ [{filmes_adicionados}/25] {filme_obj.titulo}")
+                processados_neste_genero += 1
+                print(f"✅ [{processados_neste_genero}/{META_POR_GENERO}] {filme_obj.titulo}")
 
             pagina += 1
-            time.sleep(0.1) # Respeitar o limite da API do lab
+            time.sleep(0.1)
 
-    print(f"\n🏁 Banco populado com sucesso! Total: {Filme.objects.count()} filmes.")
+    print(f"\n🏁 Banco atualizado! Total agora: {Filme.objects.count()} filmes.")
 
 if __name__ == "__main__":
     popular()

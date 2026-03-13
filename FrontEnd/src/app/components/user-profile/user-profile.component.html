@@ -1,0 +1,55 @@
+<div class="profile-wrapper">
+  <div class="container py-5">
+
+    <div class="profile-header text-center mb-5">
+      <div class="avatar-giant shadow-lg">{{ username.charAt(0) | uppercase }}</div>
+      <h1 class="mt-3 fw-bold">{{ username }}</h1>
+      <div class="d-flex justify-content-center gap-2">
+        <span class="badge-status">Assinante Premium</span>
+        <span class="badge-level">{{ userLevel }}</span>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+      <div class="col-md-6">
+        <div class="stat-card">
+          <i class="bi bi-play-circle-fill mb-2"></i>
+          <h3>{{ totalWatched }}</h3>
+          <p>Filmes Assistidos (Likes/Favs)</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="stat-card featured">
+          <i class="bi bi-fire mb-2"></i>
+          <h3>{{ topGenre }}</h3>
+          <p>Seu Gênero Favorito</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="recommendation-section mt-5" *ngIf="recommendations.length > 0">
+      <h4 class="text-white mb-4 fw-bold">
+        Porque você ama <span class="text-success">{{ topGenre }}</span>:
+      </h4>
+      <div class="row g-3">
+        <div class="col-6 col-md-3" *ngFor="let movie of recommendations">
+          <div class="movie-mini-card" [routerLink]="['/movie', movie.id]">
+            <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path"
+                 [alt]="movie.titulo"
+                 class="img-fluid rounded shadow">
+
+            <div class="mini-overlay">
+              <span class="small d-block text-center text-white">{{ movie.titulo }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="account-details mt-5 p-4 rounded" *ngIf="totalWatched > 0">
+      <p class="text-white-50 mb-0">E-mail: <span class="text-white">{{ userEmail }}</span></p>
+      <p class="text-white-50 mb-0">Conta criada em: <span class="text-white">{{ dateJoined | date:'dd/MM/yyyy' }}</span></p>
+    </div>
+
+  </div>
+</div>

@@ -8,6 +8,7 @@ import { Movie } from '../models/movie.model';
 })
 export class MovieService {
   private apiUrl = 'http://127.0.0.1:8000/api/filmes';
+  private tmdbKey = 'bb482b8769db20b6bad3c5187c230c2a';
   private searchSource = new BehaviorSubject<string>('');
   currentSearchTerm = this.searchSource.asObservable();
 
@@ -15,6 +16,11 @@ export class MovieService {
 
   changeSearchTerm(term: string) {
     this.searchSource.next(term);
+  }
+
+  // ✅ Busca trailers diretamente no TMDB (On-Demand)
+  getMovieVideos(tmdbId: number): Observable<any> {
+    return this.http.get(`https://api.themoviedb.org/3/movie/${tmdbId}/videos?api_key=${this.tmdbKey}&language=pt-BR`);
   }
 
   getMovies(): Observable<Movie[]> {
@@ -29,7 +35,6 @@ export class MovieService {
     return this.http.get<Movie>(`${this.apiUrl}/${id}/`);
   }
 
-  // ✅ NOVO MÉTODO: Chama a Action 'recomendados' do Django
   getRecomendados(id: number): Observable<Movie[]> {
     return this.http.get<Movie[]>(`${this.apiUrl}/${id}/recomendados/`);
   }

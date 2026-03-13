@@ -22,10 +22,10 @@ interface MovieGroup {
     trigger('heroFade', [
       transition(':enter', [
         style({ opacity: 0 }),
-        animate('1000ms ease-in', style({ opacity: 1 }))
+        animate('800ms ease-in', style({ opacity: 1 }))
       ]),
       transition(':leave', [
-        animate('1000ms ease-out', style({ opacity: 0 }))
+        animate('400ms ease-out', style({ opacity: 0 }))
       ])
     ])
   ]
@@ -33,6 +33,8 @@ interface MovieGroup {
 export class MovieListComponent implements OnInit, OnDestroy {
   movieGroups: MovieGroup[] = [];
   heroMovie: Movie | null = null;
+  heroMovies: Movie[] = [];
+  currentHeroIndex: number = 0;
   watchedMovies: Movie[] = [];
   searchTerm: string = '';
   allMoviesResults: Movie[] = [];
@@ -45,106 +47,41 @@ export class MovieListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadGroupedMovies();
     this.loadWatchedMovies();
-
     this.searchSub = this.movieService.currentSearchTerm.subscribe(term => {
       this.searchTerm = term;
       this.performSearch();
     });
-
-    this.startHeroCycle();
-  }
-
-  private normalizeText(text: string): string {
-    return text
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, "");
   }
 
   loadGroupedMovies(): void {
     this.movieService.getMoviesGrouped().subscribe({
       next: (data: MovieGroup[]) => {
         if (!data || data.length === 0) return;
-
-        // Extrai todos os filmes de forma segura
         const allMovies = data.reduce((acc, g) => acc.concat(g.filmes || []), [] as Movie[]);
-
-        // Remove duplicatas por ID
         const uniqueMovies = Array.from(new Map(allMovies.map(m => [m.id, m])).values());
 
         if (uniqueMovies.length > 0) {
-          // 1. ✅ NOVIDADES: Ordenado por data de lançamento (mais recente primeiro)
+          this.heroMovies = uniqueMovies.slice(0, 10);
+
           const novidades = [...uniqueMovies].sort((a, b) => {
-            const dateA = a.data_lancamento ? new Date(a.data_lancamento).getTime() : 0;
-            const dateB = b.data_lancamento ? new Date(b.data_lancamento).getTime() : 0;
-            return dateB - dateA; // Ordem decrescente
+            const d1 = a.data_lancamento ? new Date(a.data_lancamento).getTime() : 0;
+            const d2 = b.data_lancamento ? new Date(b.data_lancamento).getTime() : 0;
+            return d2 - d1;
           }).slice(0, 15);
 
-          // 2. ✅ BEM AVALIADOS: Ordenado por nota (maior primeiro)
           const bemAvaliados = [...uniqueMovies].sort((a, b) => (b.nota || 0) - (a.nota || 0)).slice(0, 15);
 
-          // Atualiza a lista de grupos para exibição
           this.movieGroups = [
             { nome_genero: 'Novidades no Catálogo', filmes: novidades },
             { nome_genero: 'Mais Bem Avaliados', filmes: bemAvaliados },
             ...data
           ];
-        } else {
-          this.movieGroups = data;
+
+          this.setHeroMovie(0);
+          this.startHeroCycle();
         }
-
-        this.setRandomHero();
-        if (this.searchTerm) this.performSearch();
-      },
-      error: (err) => console.error('Erro ao carregar fileiras:', err)
-    });
-  }
-
-  performSearch(): void {
-    if (!this.searchTerm.trim()) {
-      this.allMoviesResults = [];
-      return;
-    }
-
-    const term = this.normalizeText(this.searchTerm.trim());
-    const flatList: Movie[] = [];
-
-    this.movieGroups.forEach(group => {
-      group.filmes.forEach(movie => {
-        const matchesTitle = this.normalizeText(movie.titulo).includes(term);
-        const matchesGenre = movie.generos?.some((g: any) => {
-          if (!g) return false;
-          const nome = (typeof g === 'object') ? g.nome : String(g);
-          return this.normalizeText(nome).includes(term);
-        });
-
-        if (matchesTitle || matchesGenre) {
-          if (!flatList.find(m => m.id === movie.id)) {
-            flatList.push(movie);
-          }
-        }
-      });
-    });
-    this.allMoviesResults = flatList;
-  }
-
-  setRandomHero(): void {
-    if (this.movieGroups.length > 0) {
-      const randomGroup = this.movieGroups[Math.floor(Math.random() * this.movieGroups.length)];
-      if (randomGroup.filmes && randomGroup.filmes.length > 0) {
-        const randomMovie = randomGroup.filmes[Math.floor(Math.random() * randomGroup.filmes.length)];
-        if (this.heroMovie?.id === randomMovie.id) {
-          this.setRandomHero();
-          return;
-        }
-        this.heroMovie = null;
-        setTimeout(() => { this.heroMovie = randomMovie; }, 50);
       }
-    }
-  }
-
-  startHeroCycle(): void {
-    this.autoCycleInterval = setInterval(() => { this.setRandomHero(); }, 8000);
+    });
   }
 
   loadWatchedMovies(): void {
@@ -154,8 +91,57 @@ export class MovieListComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
+  setHeroMovie(index: number): void {
+    this.currentHeroIndex = index;
+    this.heroMovie = this.heroMovies[this.currentHeroIndex];
+  }
+
+  startHeroCycle(): void {
+    this.stopHeroCycle();
+    this.autoCycleInterval = setInterval(() => {
+      const nextIndex = (this.currentHeroIndex + 1) % this.heroMovies.length;
+      this.setHeroMovie(nextIndex);
+    }, 8000);
+  }
+
+  stopHeroCycle(): void {
     if (this.autoCycleInterval) clearInterval(this.autoCycleInterval);
+  }
+
+  goToHero(index: number): void {
+    this.stopHeroCycle();
+    this.setHeroMovie(index);
+    this.startHeroCycle();
+  }
+
+  performSearch(): void {
+    if (!this.searchTerm.trim()) {
+      this.allMoviesResults = [];
+      return;
+    }
+    const term = this.normalizeText(this.searchTerm.trim());
+    const flatList: Movie[] = [];
+    this.movieGroups.forEach(group => {
+      group.filmes.forEach(movie => {
+        const matchesTitle = this.normalizeText(movie.titulo).includes(term);
+        const matchesGenre = movie.generos?.some((g: any) => {
+          const nomeG = (typeof g === 'object') ? g.nome : String(g);
+          return this.normalizeText(nomeG).includes(term);
+        });
+        if ((matchesTitle || matchesGenre) && !flatList.find(m => m.id === movie.id)) {
+          flatList.push(movie);
+        }
+      });
+    });
+    this.allMoviesResults = flatList;
+  }
+
+  private normalizeText(text: string): string {
+    return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+  }
+
+  ngOnDestroy(): void {
+    this.stopHeroCycle();
     this.searchSub.unsubscribe();
   }
 
