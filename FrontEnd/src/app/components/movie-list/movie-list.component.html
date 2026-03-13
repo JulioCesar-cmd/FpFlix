@@ -31,38 +31,27 @@
   <div *ngIf="searchTerm" class="search-results-container">
     <h2 class="genre-title mb-4">Resultados para: "{{ searchTerm }}"</h2>
     <div class="results-grid px-4">
-      <div *ngFor="let movie of allMoviesResults; trackBy: trackByMovieId"
+      <div *ngFor="let movie of allMoviesResults | slice:0:getLimit('search'); trackBy: trackByMovieId"
            class="movie-card"
            [routerLink]="['/movie', movie.id]">
         <div class="poster-wrapper shadow-lg">
-          <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster">
+          <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster" loading="lazy">
         </div>
         <p class="movie-name">{{ movie.titulo }}</p>
+      </div>
+
+      <div *ngIf="allMoviesResults.length > getLimit('search')"
+           class="movie-card load-more-card"
+           (click)="loadMore('search')">
+        <div class="load-more-content">
+          <i class="bi bi-plus-circle"></i>
+          <span>Ver mais</span>
+        </div>
       </div>
     </div>
   </div>
 
   <div *ngIf="!searchTerm && movieGroups.length > 0">
-
-    <div class="genre-section mb-5">
-      <h2 class="genre-title ms-4 mb-3">{{ movieGroups[0].nome_genero }}</h2>
-      <div class="movie-row">
-        <div *ngFor="let movie of movieGroups[0].filmes; trackBy: trackByMovieId" class="movie-card" [routerLink]="['/movie', movie.id]">
-          <div class="poster-wrapper shadow-lg"><img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster"></div>
-          <p class="movie-name">{{ movie.titulo }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="genre-section mb-5">
-      <h2 class="genre-title ms-4 mb-3">{{ movieGroups[1].nome_genero }}</h2>
-      <div class="movie-row">
-        <div *ngFor="let movie of movieGroups[1].filmes; trackBy: trackByMovieId" class="movie-card" [routerLink]="['/movie', movie.id]">
-          <div class="poster-wrapper shadow-lg"><img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster"></div>
-          <p class="movie-name">{{ movie.titulo }}</p>
-        </div>
-      </div>
-    </div>
 
     <div class="genre-section mb-5" *ngIf="watchedMovies.length > 0">
       <h2 class="genre-title ms-4 mb-3">
@@ -73,20 +62,33 @@
              class="movie-card watched-card"
              [routerLink]="['/movie', movie.id]">
           <div class="poster-wrapper shadow-lg">
-            <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster">
+            <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster" loading="lazy">
           </div>
           <p class="movie-name">{{ movie.titulo }}</p>
         </div>
       </div>
     </div>
 
-    <ng-container *ngFor="let group of movieGroups; let i = index">
-      <div class="genre-section mb-5" *ngIf="i > 1">
+    <ng-container *ngFor="let group of movieGroups">
+      <div class="genre-section mb-5">
         <h2 class="genre-title ms-4 mb-3">{{ group.nome_genero }}</h2>
         <div class="movie-row">
-          <div *ngFor="let movie of group.filmes; trackBy: trackByMovieId" class="movie-card" [routerLink]="['/movie', movie.id]">
-            <div class="poster-wrapper shadow-lg"><img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster"></div>
+          <div *ngFor="let movie of group.filmes | slice:0:getLimit(group.nome_genero); trackBy: trackByMovieId"
+               class="movie-card"
+               [routerLink]="['/movie', movie.id]">
+            <div class="poster-wrapper shadow-lg">
+              <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster" loading="lazy">
+            </div>
             <p class="movie-name">{{ movie.titulo }}</p>
+          </div>
+
+          <div *ngIf="group.filmes.length > getLimit(group.nome_genero)"
+               class="movie-card load-more-card"
+               (click)="loadMore(group.nome_genero)">
+            <div class="load-more-content">
+              <i class="bi bi-plus-circle"></i>
+              <span>Ver mais</span>
+            </div>
           </div>
         </div>
       </div>

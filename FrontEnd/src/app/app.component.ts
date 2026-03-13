@@ -31,8 +31,6 @@ export class AppComponent implements OnInit {
   searchTerm = '';
   isMenuOpen = false;
   isScrolled = false;
-
-  // ✅ ADICIONE ESTAS VARIÁVEIS PARA O EXPLORAR FUNCIONAR
   isGenresOpen = false;
   genres: string[] = [];
 
@@ -50,29 +48,43 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.checkLoginStatus();
-    this.loadGenres(); // ✅ Carrega os gêneros do banco
+    this.loadGenres();
     this.router.events.subscribe(() => {
       this.checkLoginStatus();
-      this.isMenuOpen = false;
-      this.isGenresOpen = false;
+      // Não fechamos os menus aqui para não conflitar com a navegação manual
     });
   }
 
-  // ✅ MÉTODO toggleGenres QUE ESTAVA FALTANDO
   toggleGenres(event: Event) {
     event.stopPropagation();
-    this.isMenuOpen = false; // Fecha o menu do perfil se o de gêneros abrir
+    this.isMenuOpen = false;
     this.isGenresOpen = !this.isGenresOpen;
   }
 
-  // ✅ MÉTODO PARA FILTRAR PELO EXPLORAR
+  // ✅ MÉTODO CORRIGIDO: Garante sincronia entre busca, navegação e scroll
   filterByGenre(genre: string) {
-    this.searchTerm = genre;
-    this.onSearchChange();
     this.isGenresOpen = false;
+    this.isMenuOpen = false;
+    this.searchTerm = genre;
+
+    // 1. Atualiza o serviço
+    this.movieService.changeSearchTerm(this.searchTerm);
+
+    if (this.router.url === '/') {
+      // ✅ O SEGREDO: setTimeout força o scroll a rodar após a renderização
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 0);
+    } else {
+      this.router.navigate(['/']).then(() => {
+        // Quando vem de fora, o instant é melhor para não parecer travado
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }, 0);
+      });
+    }
   }
 
-  // ✅ CARREGA GÊNEROS REAIS DO SEU BANCO
   loadGenres() {
     this.movieService.getMovies().subscribe(movies => {
       const genreSet = new Set<string>();
@@ -93,14 +105,28 @@ export class AppComponent implements OnInit {
 
   toggleMenu(event: Event) {
     event.stopPropagation();
-    this.isGenresOpen = false; // Fecha gêneros se o perfil abrir
+    this.isGenresOpen = false;
     this.isMenuOpen = !this.isMenuOpen;
   }
 
   onSearchChange() {
+    // 1. Envia o termo para o serviço para filtrar os filmes
     this.movieService.changeSearchTerm(this.searchTerm);
-    if (this.router.url !== '/') {
-      this.router.navigate(['/']).catch(err => console.error(err));
+
+    if (this.router.url === '/') {
+      // ✅ Se o usuário digitou algo (não está vazio), sobe para o topo
+      if (this.searchTerm.trim().length > 0) {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 0);
+      }
+    } else {
+      // Se não estiver na home, navega para lá
+      this.router.navigate(['/']).then(() => {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }, 0);
+      });
     }
   }
 
@@ -119,17 +145,17 @@ export class AppComponent implements OnInit {
     this.isMenuOpen = false;
     this.isGenresOpen = false;
 
-    // Se já estiver na home, apenas sobe o scroll manualmente
     if (this.router.url === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/']).then(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      });
     }
   }
 
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
-    // Fecha ambos se clicar fora
     if (!event.target.closest('.dropdown-container') && !event.target.closest('.genres-container')) {
       this.isMenuOpen = false;
       this.isGenresOpen = false;

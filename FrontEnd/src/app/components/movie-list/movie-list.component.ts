@@ -38,9 +38,11 @@ export class MovieListComponent implements OnInit, OnDestroy {
   watchedMovies: Movie[] = [];
   searchTerm: string = '';
   allMoviesResults: Movie[] = [];
-
-  // ✅ Backup de todos os filmes para busca global (Resolve o problema do Jujutsu)
   allMoviesForSearch: Movie[] = [];
+
+  // ✅ Controle de paginação visual
+  displayLimits: { [key: string]: number } = {};
+  readonly INITIAL_LIMIT = 20;
 
   private searchSub: Subscription = new Subscription();
   private autoCycleInterval: any;
@@ -48,31 +50,55 @@ export class MovieListComponent implements OnInit, OnDestroy {
   constructor(private movieService: MovieService, private router: Router) {}
 
   ngOnInit(): void {
-    this.loadGroupedMovies();
-    this.loadWatchedMovies();
+    // ✅ 1º: Começa a ouvir a busca IMEDIATAMENTE
+    // Isso garante que o setTimeout de 100ms do app.component seja capturado
     this.searchSub = this.movieService.currentSearchTerm.subscribe(term => {
       this.searchTerm = term;
-      this.performSearch();
+
+      // Se já tivermos filmes, filtra. Se não, o performSearch lidará com isso depois.
+      if (this.allMoviesForSearch.length > 0) {
+        this.performSearch();
+      }
     });
+
+    // ✅ 2º: Carrega os dados do banco
+    this.loadGroupedMovies();
+    this.loadWatchedMovies();
+
+    // ✅ 3º: Garante que a página sempre comece no topo ao carregar
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  // ✅ Funções para o sistema "Ver Mais"
+  getLimit(category: string): number {
+    return this.displayLimits[category] || this.INITIAL_LIMIT;
+  }
+
+  loadMore(category: string): void {
+    const current = this.displayLimits[category] || this.INITIAL_LIMIT;
+    this.displayLimits[category] = current + 20;
   }
 
   loadGroupedMovies(): void {
     this.movieService.getMoviesGrouped().subscribe({
       next: (data: MovieGroup[]) => {
-        // 👇 ADICIONE ESTA LINHA AQUI
-        console.log('Dados vindos do Django:', data);
-
         if (!data || data.length === 0) return;
 
-        // Extrai todos os filmes únicos vindos do banco
+        // 1. Extrai todos os filmes únicos para a busca
         const allMovies = data.reduce((acc, g) => acc.concat(g.filmes || []), [] as Movie[]);
         const uniqueMovies = Array.from(new Map(allMovies.map(m => [m.id, m])).values());
 
-        // ✅ Guarda a lista completa para a busca global
+        // 2. Salva no array global
         this.allMoviesForSearch = [...uniqueMovies];
 
+        // ✅ 3. CORREÇÃO DE SINCRONIA: Se o usuário veio de outra página via "Explorar",
+        // o searchTerm já terá valor. Então filtramos aqui assim que os filmes chegam.
+        if (this.searchTerm) {
+          this.performSearch();
+        }
+
+        // 4. Lógica das fileiras e Hero (Restante do seu código)
         if (uniqueMovies.length > 0) {
-          // ✅ Melhora o Hero: Pega 10 aleatórios dos 40 melhores avaliados
           const topRated = [...uniqueMovies]
             .sort((a, b) => (b.nota || 0) - (a.nota || 0))
             .slice(0, 40);
@@ -82,9 +108,9 @@ export class MovieListComponent implements OnInit, OnDestroy {
             const d1 = a.data_lancamento ? new Date(a.data_lancamento).getTime() : 0;
             const d2 = b.data_lancamento ? new Date(b.data_lancamento).getTime() : 0;
             return d2 - d1;
-          }).slice(0, 15);
+          }).slice(0, 30);
 
-          const bemAvaliados = [...uniqueMovies].sort((a, b) => (b.nota || 0) - (a.nota || 0)).slice(0, 15);
+          const bemAvaliados = [...uniqueMovies].sort((a, b) => (b.nota || 0) - (a.nota || 0)).slice(0, 30);
 
           this.movieGroups = [
             { nome_genero: 'Novidades no Catálogo', filmes: novidades },
@@ -95,7 +121,8 @@ export class MovieListComponent implements OnInit, OnDestroy {
           this.setHeroMovie(0);
           this.startHeroCycle();
         }
-      }
+      },
+      error: (err) => console.error('Erro ao carregar filmes:', err)
     });
   }
 
@@ -134,25 +161,21 @@ export class MovieListComponent implements OnInit, OnDestroy {
       this.allMoviesResults = [];
       return;
     }
-
     const term = this.normalizeText(this.searchTerm.trim());
-
-    // ✅ BUSCA GLOBAL: Procura em todos os filmes do banco
     const results = this.allMoviesForSearch.filter(movie => {
       const titleMatch = this.normalizeText(movie.titulo).includes(term);
-
       const genreMatch = movie.generos?.some((g: any) => {
         const nomeG = (typeof g === 'object') ? g.nome : String(g);
         return this.normalizeText(nomeG).includes(term);
       });
-
       return titleMatch || genreMatch;
     });
 
-    // ✅ ORDEM ALFABÉTICA (A-Z)
     this.allMoviesResults = results.sort((a, b) =>
       a.titulo.localeCompare(b.titulo, 'pt-BR', { sensitivity: 'base' })
     );
+    // Reseta o limite da busca ao pesquisar algo novo
+    this.displayLimits['search'] = this.INITIAL_LIMIT;
   }
 
   private normalizeText(text: string): string {

@@ -112,7 +112,6 @@
   text-transform: uppercase;
   margin-left: 4%;
   margin-top: 40px;
-
   i { vertical-align: middle; }
 }
 
@@ -136,14 +135,9 @@
   position: relative;
   z-index: 1;
 
-  /* ✅ OPACIDADE REDUZIDA NA 4ª FILEIRA */
   &.watched-card {
-    opacity: 0.5;
-    filter: grayscale(20%);
-    &:hover {
-      opacity: 1;
-      filter: grayscale(0%);
-    }
+    opacity: 0.6;
+    &:hover { opacity: 1; }
   }
 
   .poster-wrapper {
@@ -192,16 +186,59 @@
   }
 }
 
+/* ✅ CARD "VER MAIS" */
+.load-more-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 168, 89, 0.05);
+  border: 2px dashed rgba(0, 168, 89, 0.3) !important;
+  border-radius: 12px;
+  height: 250px;
+  width: 170px;
+  margin-right: 40px;
+  flex: 0 0 auto;
+
+  .load-more-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #00a859;
+    font-weight: bold;
+    gap: 10px;
+
+    i {
+      font-size: 2.5rem;
+      transition: transform 0.3s ease;
+    }
+    span {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+
+  &:hover {
+    background: rgba(0, 168, 89, 0.15);
+    border-color: #00ff84 !important;
+    transform: scale(1.1) !important;
+
+    .load-more-content i {
+      transform: rotate(90deg);
+      color: #00ff84;
+    }
+    span { color: #fff; }
+  }
+}
+
 /* ✅ RESULTADOS DA BUSCA */
 .search-results-container {
   padding-top: 100px;
   min-height: 80vh;
+
   .results-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: flex-start;
-    width: 100%;
-    padding-bottom: 50px;
   }
 }

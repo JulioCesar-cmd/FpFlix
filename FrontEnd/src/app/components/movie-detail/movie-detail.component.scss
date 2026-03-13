@@ -11,6 +11,12 @@
   100% { background-position: 200% 0; }
 }
 
+.skeleton-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
 /* --- WRAPPER E BACKDROP --- */
 .detail-wrapper {
   background-color: #000d07;
@@ -49,20 +55,7 @@
   &:hover { background-color: #008f4c; color: white !important; transform: scale(1.05); }
 }
 
-/* --- BOTÕES DE AÇÃO --- */
-.transition-all { transition: all 0.3s ease; }
-
-.btn-outline-light:hover { background: rgba(255,255,255,0.1); color: white; }
-
-/* --- ✅ SEÇÃO DO TRAILER (70% CENTRALIZADO) --- */
-.trailer-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 50px;
-}
-
+/* --- SEÇÃO DO TRAILER --- */
 .video-wrapper-70 {
   width: 70%;
   aspect-ratio: 16 / 9;
@@ -70,19 +63,16 @@
   overflow: hidden;
   border: 3px solid #004a23;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-  transition: border-color 0.3s ease;
-
-  &:hover { border-color: #00a859; }
-
+  margin: 0 auto;
   iframe { width: 100%; height: 100%; display: block; }
 }
 
-/* --- RECOMENDADOS --- */
 .genre-title {
   color: #ffffff; font-weight: bold; border-left: 5px solid #00a859;
   padding-left: 15px; text-transform: uppercase;
 }
 
+/* --- RECOMENDADOS (CORRIGIDO) --- */
 .movie-row {
   display: flex; gap: 20px; overflow-x: auto; padding: 20px 0;
   scrollbar-width: none; &::-webkit-scrollbar { display: none; }
@@ -91,23 +81,38 @@
 .movie-card {
   flex: 0 0 auto; width: 170px; cursor: pointer;
   transition: transform 0.3s ease;
-  &:hover { transform: translateY(-8px); .poster-wrapper { border-color: #00a859; } }
+
+  &:hover {
+    transform: translateY(-8px);
+    .poster-wrapper { border-color: #00a859; }
+    .movie-name-rel { color: #00a859 !important; } // Fica verde no hover
+  }
 }
 
 .poster-wrapper {
   border-radius: 8px; overflow: hidden; border: 2px solid #1a1a1a; height: 250px;
-  transition: border-color 0.3s ease;
   img { width: 100%; height: 100%; object-fit: cover; }
 }
 
 .movie-name-rel {
-  color: #ffffff; font-size: 0.9rem; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+  color: #ffffff !important; // ✅ Garante o branco no fundo escuro
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  text-align: center;
+  transition: color 0.3s ease;
 }
 
-/* RESPONSIVIDADE MOBILE */
+.movie-rating-rel {
+  display: block;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .video-wrapper-70 { width: 95%; }
   .display-3 { font-size: 2.5rem; }
-  .main-poster { margin-bottom: 20px; }
 }

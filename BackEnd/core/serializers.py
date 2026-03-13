@@ -14,8 +14,7 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
         fields = ['id', 'tipo', 'data_avaliacao']
 
 class FilmeSerializer(serializers.ModelSerializer):
-    # ✅ CORREÇÃO: Agora 'generos' retorna o objeto completo diretamente.
-    # Isso resolve o erro TS2339 no Angular ao tentar acessar .nome
+    # Agora 'generos' retorna o objeto completo diretamente.
     generos = GeneroSerializer(many=True, read_only=True)
 
     nota = serializers.FloatField()
@@ -28,6 +27,7 @@ class FilmeSerializer(serializers.ModelSerializer):
             'id', 'titulo', 'sinopse', 'poster_path',
             'backdrop_path', 'tmdb_id', 'generos', 'nota',
             'duracao', 'classificacao', 'tagline', 'data_lancamento',
+            'idioma_original',  # ✅ ADICIONADO AQUI
             'foi_visto', 'tipo_avaliacao'
         ]
 

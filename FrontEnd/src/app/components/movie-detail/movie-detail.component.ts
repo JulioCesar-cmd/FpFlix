@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MovieService } from '../../services/movie.service';
 import { Movie } from '../../models/movie.model';
 import { CommonModule } from '@angular/common';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations'; // ✅ query e stagger adicionados
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
@@ -13,10 +13,22 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   templateUrl: './movie-detail.component.html',
   styleUrls: ['./movie-detail.component.scss'],
   animations: [
+    // Animação para o bloco principal (Fade + Slide Up)
     trigger('fadeSlide', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(20px)' }),
-        animate('500ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        style({ opacity: 0, transform: 'translateY(30px)' }),
+        animate('700ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+    // ✅ NOVA ANIMAÇÃO: Entrada em cascata para os cards
+    trigger('staggerCards', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'scale(0.9) translateY(20px)' }),
+          stagger(80, [
+            animate('500ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 1, transform: 'scale(1) translateY(0)' }))
+          ])
+        ], { optional: true })
       ])
     ])
   ]
@@ -26,6 +38,7 @@ export class MovieDetailComponent implements OnInit {
   relatedMovies: Movie[] = [];
   isFavorito: boolean = false;
   trailerUrl: SafeResourceUrl | null = null;
+  isLoading: boolean = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -36,7 +49,10 @@ export class MovieDetailComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
-      if (id) this.loadMovieDetails(id);
+      if (id) {
+        this.isLoading = true;
+        this.loadMovieDetails(id);
+      }
     });
   }
 
@@ -44,15 +60,23 @@ export class MovieDetailComponent implements OnInit {
     this.movie = undefined;
     this.relatedMovies = [];
     this.trailerUrl = null;
+
     this.movieService.getMovieById(id).subscribe({
       next: (data: Movie) => {
         this.movie = data;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
         this.checkIfIsFavorito(data.id);
         this.loadRelatedMovies(data.id);
-        this.loadTrailer(data.tmdb_id);
+
+        setTimeout(() => {
+          this.loadTrailer(data.tmdb_id);
+          this.isLoading = false;
+        }, 800);
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error(err);
+        this.isLoading = false;
+      }
     });
   }
 
@@ -60,7 +84,7 @@ export class MovieDetailComponent implements OnInit {
     this.movieService.getMovieVideos(tmdbId).subscribe(res => {
       const trailer = res.results.find((v: any) => v.type === 'Trailer' && v.site === 'YouTube');
       if (trailer) {
-        const url = `https://www.youtube.com/embed/${trailer.key}?rel=0&modestbranding=1`;
+        const url = `https://www.youtube.com/embed/${trailer.key}?rel=0&modestbranding=1&autoplay=0`;
         this.trailerUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
       }
     });
