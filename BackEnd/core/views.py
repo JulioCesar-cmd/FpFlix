@@ -63,7 +63,8 @@ class FilmeViewSet(viewsets.ModelViewSet):
         generos = Genero.objects.all()
         resposta_agrupada = []
         for g in generos:
-            filmes = Filme.objects.filter(generos=g).order_by('-nota')[:20]
+            # ✅ Aumentamos de 20 para 100 para garantir que a busca encontre tudo
+            filmes = Filme.objects.filter(generos=g).order_by('-nota')[:100]
             if filmes.exists():
                 serializer = self.get_serializer(filmes, many=True, context={'request': request})
                 resposta_agrupada.append({

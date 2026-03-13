@@ -1,4 +1,5 @@
-<div class="min-vh-100" style="background-color: #000d07;">
+<div class="min-vh-100 d-flex flex-column" style="background-color: #000d07;">
+
   <nav class="navbar fixed-top nav-custom"
        [ngClass]="{'nav-scrolled': isScrolled || searchTerm.trim().length > 0}">
     <div class="container-fluid px-4">
@@ -74,7 +75,45 @@
     </div>
   </nav>
 
-  <main [@routeAnimations]="prepareRoute(outlet)">
+  <main class="flex-grow-1" [@routeAnimations]="prepareRoute(outlet)">
     <router-outlet #outlet="outlet"></router-outlet>
   </main>
+
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-section brand">
+        <h3><span style="color: #00a859;">FPF</span>FLIX</h3>
+        <p>Projeto de Engenharia de Software</p>
+        <p class="ufam-text">UFAM - Universidade Federal do Amazonas</p>
+      </div>
+
+      <div class="footer-section links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a routerLink="/" (click)="resetSearch(); isMenuOpen = false">Início</a></li>
+          <li><a routerLink="/favoritos" onclick="window.scrollTo(0, 0)">Minha Lista</a></li>
+          <li><a routerLink="/perfil" onclick="window.scrollTo(0, 0)">Meu Perfil</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section credits">
+        <h4>Dados & Social</h4>
+        <p>Dados fornecidos por <strong>TMDB</strong></p>
+        <div class="social-icons">
+          <a href="https://github.com/JulioCesar-cmd" target="_blank" title="GitHub">
+            <i class="bi bi-github"></i>
+          </a>
+          <a href="https://www.linkedin.com/in/julio-munhois-63b84a38b/" target="_blank" title="LinkedIn">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Julio Cesar Munhois de Lima. Todos os direitos reservados.</p>
+      <div class="manaus-tag">Manaus, Amazonas</div>
+    </div>
+  </footer>
+
 </div>

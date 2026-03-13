@@ -39,6 +39,9 @@ export class MovieListComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   allMoviesResults: Movie[] = [];
 
+  // ✅ Backup de todos os filmes para busca global (Resolve o problema do Jujutsu)
+  allMoviesForSearch: Movie[] = [];
+
   private searchSub: Subscription = new Subscription();
   private autoCycleInterval: any;
 
@@ -56,12 +59,24 @@ export class MovieListComponent implements OnInit, OnDestroy {
   loadGroupedMovies(): void {
     this.movieService.getMoviesGrouped().subscribe({
       next: (data: MovieGroup[]) => {
+        // 👇 ADICIONE ESTA LINHA AQUI
+        console.log('Dados vindos do Django:', data);
+
         if (!data || data.length === 0) return;
+
+        // Extrai todos os filmes únicos vindos do banco
         const allMovies = data.reduce((acc, g) => acc.concat(g.filmes || []), [] as Movie[]);
         const uniqueMovies = Array.from(new Map(allMovies.map(m => [m.id, m])).values());
 
+        // ✅ Guarda a lista completa para a busca global
+        this.allMoviesForSearch = [...uniqueMovies];
+
         if (uniqueMovies.length > 0) {
-          this.heroMovies = uniqueMovies.slice(0, 10);
+          // ✅ Melhora o Hero: Pega 10 aleatórios dos 40 melhores avaliados
+          const topRated = [...uniqueMovies]
+            .sort((a, b) => (b.nota || 0) - (a.nota || 0))
+            .slice(0, 40);
+          this.heroMovies = topRated.sort(() => 0.5 - Math.random()).slice(0, 10);
 
           const novidades = [...uniqueMovies].sort((a, b) => {
             const d1 = a.data_lancamento ? new Date(a.data_lancamento).getTime() : 0;
@@ -119,21 +134,25 @@ export class MovieListComponent implements OnInit, OnDestroy {
       this.allMoviesResults = [];
       return;
     }
+
     const term = this.normalizeText(this.searchTerm.trim());
-    const flatList: Movie[] = [];
-    this.movieGroups.forEach(group => {
-      group.filmes.forEach(movie => {
-        const matchesTitle = this.normalizeText(movie.titulo).includes(term);
-        const matchesGenre = movie.generos?.some((g: any) => {
-          const nomeG = (typeof g === 'object') ? g.nome : String(g);
-          return this.normalizeText(nomeG).includes(term);
-        });
-        if ((matchesTitle || matchesGenre) && !flatList.find(m => m.id === movie.id)) {
-          flatList.push(movie);
-        }
+
+    // ✅ BUSCA GLOBAL: Procura em todos os filmes do banco
+    const results = this.allMoviesForSearch.filter(movie => {
+      const titleMatch = this.normalizeText(movie.titulo).includes(term);
+
+      const genreMatch = movie.generos?.some((g: any) => {
+        const nomeG = (typeof g === 'object') ? g.nome : String(g);
+        return this.normalizeText(nomeG).includes(term);
       });
+
+      return titleMatch || genreMatch;
     });
-    this.allMoviesResults = flatList;
+
+    // ✅ ORDEM ALFABÉTICA (A-Z)
+    this.allMoviesResults = results.sort((a, b) =>
+      a.titulo.localeCompare(b.titulo, 'pt-BR', { sensitivity: 'base' })
+    );
   }
 
   private normalizeText(text: string): string {

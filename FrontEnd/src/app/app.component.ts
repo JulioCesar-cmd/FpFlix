@@ -116,7 +116,13 @@ export class AppComponent implements OnInit {
   resetSearch() {
     this.searchTerm = '';
     this.movieService.changeSearchTerm('');
-    if (this.router.url !== '/') {
+    this.isMenuOpen = false;
+    this.isGenresOpen = false;
+
+    // Se já estiver na home, apenas sobe o scroll manualmente
+    if (this.router.url === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
       this.router.navigate(['/']);
     }
   }
