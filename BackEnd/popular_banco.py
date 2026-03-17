@@ -3,14 +3,19 @@ import django
 import requests
 import time
 from collections import Counter
+from dotenv import load_dotenv  # ✅ Adicionado para ler as chaves
 
-# Configuração do Django
+# 1. Carrega as variáveis do arquivo .env ANTES de qualquer coisa
+load_dotenv()
+
+# 2. Configuração do Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Base.settings')
 django.setup()
 
 from core.models import Filme, Genero
 
-API_KEY = 'bb482b8769db20b6bad3c5187c230c2a'
+# 3. Puxa a chave de forma segura
+API_KEY = os.getenv('TMDB_API_KEY') # ✅ Puxando do .env
 URL_BASE = "https://api.themoviedb.org/3"
 
 def top_generos():
@@ -29,12 +34,16 @@ def buscar_generos():
     return res.json().get("genres", []) if res.status_code == 200 else []
 
 def popular():
+    if not API_KEY:
+        print("❌ Erro: TMDB_API_KEY não encontrada no arquivo .env!")
+        return
+
     print("🎬 Descobrindo gêneros populares...")
     top10_ids = top_generos()
     generos_api = buscar_generos()
     generos_dict = {g["id"]: g["name"] for g in generos_api}
 
-    # Meta aumentada: 25 antigos + 15 novos = 40
+    # Meta de filmes por gênero
     META_POR_GENERO = 40
 
     for genero_id in top10_ids:
@@ -42,6 +51,7 @@ def popular():
         if not nome_genero: continue
 
         print(f"\n📂 Processando Gênero: {nome_genero}")
+        # Usando update_or_create para garantir que o nome esteja sempre atualizado
         genero_obj, _ = Genero.objects.get_or_create(
             tmdb_id=genero_id,
             defaults={"nome": nome_genero}
@@ -57,7 +67,7 @@ def popular():
             if res.status_code != 200: break
 
             filmes = res.json().get("results", [])
-            if not filmes: break # Fim das páginas disponíveis
+            if not filmes: break
 
             for f in filmes:
                 if processados_neste_genero >= META_POR_GENERO: break
@@ -66,17 +76,16 @@ def popular():
                 if not f.get("poster_path") or not f.get("backdrop_path") or not f.get("overview"):
                     continue
 
-                # Se o filme já existe, associamos ao gênero e contamos como processado
-                if Filme.objects.filter(tmdb_id=f['id']).exists():
-                    filme_obj = Filme.objects.get(tmdb_id=f['id'])
-                    if genero_obj not in filme_obj.generos.all():
-                        filme_obj.generos.add(genero_obj)
+                # Se o filme já existe, associamos ao gênero e contamos
+                filme_db = Filme.objects.filter(tmdb_id=f['id']).first()
+                if filme_db:
+                    if genero_obj not in filme_db.generos.all():
+                        filme_db.generos.add(genero_obj)
                         print(f"🔗 {f['title']} vinculado a {nome_genero}")
-
                     processados_neste_genero += 1
                     continue
 
-                # Buscar detalhes para pegar o Runtime e Tagline
+                # Buscar detalhes (Runtime e Tagline)
                 detalhes_res = requests.get(f"{URL_BASE}/movie/{f['id']}?api_key={API_KEY}&language=pt-BR")
                 if detalhes_res.status_code != 200: continue
                 detalhes = detalhes_res.json()
@@ -103,7 +112,7 @@ def popular():
                 print(f"✅ [{processados_neste_genero}/{META_POR_GENERO}] {filme_obj.titulo}")
 
             pagina += 1
-            time.sleep(0.1)
+            time.sleep(0.1) # Evita Rate Limit da API
 
     print(f"\n🏁 Banco atualizado! Total agora: {Filme.objects.count()} filmes.")
 

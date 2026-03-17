@@ -1,0 +1,13 @@
+<div class="movie-card" [routerLink]="['/movie', movie?.id]">
+  <div class="poster-wrapper shadow-lg">
+    <img [src]="movie?.poster_path ? 'https://image.tmdb.org/t/p/w342' + movie.poster_path : 'assets/images/no-poster.png'"
+         [alt]="movie?.titulo"
+         class="movie-poster"
+         loading="lazy">
+
+    <div class="card-badge" *ngIf="movie?.nota">
+      <i class="bi bi-star-fill text-warning"></i> {{ movie?.nota | number:'1.1-1' }}
+    </div>
+  </div>
+  <p class="movie-name">{{ movie?.titulo }}</p>
+</div>

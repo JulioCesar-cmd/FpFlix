@@ -1,5 +1,6 @@
 <div class="detail-wrapper pb-5">
 
+  <!-- SKELETON (Carregando) -->
   <div *ngIf="isLoading" class="skeleton-container">
     <div class="movie-backdrop skeleton-loader" style="height: 65vh; opacity: 0.3;"></div>
     <div class="container movie-content">
@@ -13,7 +14,6 @@
           <div class="d-flex gap-2 mb-5">
             <div class="skeleton-loader" style="height: 35px; width: 100px;"></div>
             <div class="skeleton-loader" style="height: 35px; width: 100px;"></div>
-            <div class="skeleton-loader" style="height: 35px; width: 100px;"></div>
           </div>
           <div class="skeleton-loader" style="height: 180px; width: 100%;"></div>
         </div>
@@ -21,6 +21,7 @@
     </div>
   </div>
 
+  <!-- CONTEÚDO PRINCIPAL -->
   <div *ngIf="!isLoading && movie" [@fadeSlide]>
 
     <div class="movie-backdrop" [style.background-image]="'url(https://image.tmdb.org/t/p/original' + movie.backdrop_path + ')'">
@@ -32,6 +33,7 @@
         <div class="col-md-4 position-relative">
           <img [src]="'https://image.tmdb.org/t/p/w500' + movie.poster_path"
                [alt]="movie.titulo"
+               fetchpriority="high"
                class="img-fluid rounded shadow-lg border-green main-poster">
         </div>
 
@@ -40,7 +42,7 @@
           <p *ngIf="movie.tagline" class="text-secondary fst-italic fs-5 mb-4">"{{ movie.tagline }}"</p>
 
           <div class="d-flex flex-wrap gap-3 mb-3 align-items-center info-badges">
-            <span class="text-warning fw-bold fs-5">⭐ {{ movie.nota }}</span>
+            <span class="text-warning fw-bold fs-5">⭐ {{ movie.nota | number:'1.1-1' }}</span>
             <span class="badge bg-secondary px-3 py-2">{{ movie.classificacao || 'L' }}</span>
             <span class="text-white-50">{{ movie.duracao }} min</span>
             <span *ngFor="let g of movie.generos" class="badge bg-green-dark px-3 py-2 me-1">
@@ -77,6 +79,7 @@
       </div>
     </div>
 
+    <!-- TRAILER -->
     <div class="trailer-container mt-5" *ngIf="trailerUrl" [@fadeSlide]>
       <div class="container">
         <h2 class="genre-title mb-4">Trailer Oficial</h2>
@@ -90,20 +93,18 @@
 
     <hr class="border-secondary my-5 opacity-25">
 
-    <div class="container-fluid related-section mt-5">
-      <h2 class="genre-title ms-4 mb-4 fw-bold">Filmes que talvez você goste</h2>
+    <!-- ✅ RECOMENDADOS (Título Verde Forçado) -->
+    <div class="container-fluid related-section mt-5 px-4">
+      <h2 class="custom-related-title mb-4">
+        <i class="bi bi-stars me-2"></i> Filmes que talvez você goste
+      </h2>
 
-      <div class="movie-row px-4" *ngIf="relatedMovies.length > 0" [@staggerCards]="relatedMovies.length">
-        <div *ngFor="let rel of relatedMovies" class="movie-card" [routerLink]="['/movie', rel.id]">
-          <div class="poster-wrapper shadow-lg">
-            <img [src]="'https://image.tmdb.org/t/p/w342' + rel.poster_path" [alt]="rel.titulo" class="movie-poster" loading="lazy">
-          </div>
-          <div class="movie-details-bottom mt-2 text-center">
-            <p class="movie-name-rel">{{ rel.titulo }}</p>
-            <span class="movie-rating-rel text-warning">⭐ {{ rel.nota }}</span>
-          </div>
-        </div>
-      </div>
+      <!-- Removido o title daqui para não duplicar -->
+      <app-movie-row
+        *ngIf="relatedMovies.length > 0"
+        [movies]="relatedMovies">
+      </app-movie-row>
     </div>
+
   </div>
 </div>

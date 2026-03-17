@@ -1,47 +1,78 @@
 <div class="home-container">
+
   <div class="hero-container-fixed" *ngIf="heroMovie && !searchTerm">
+
     <div *ngFor="let movie of [heroMovie]" [@heroFade]="movie?.id" class="hero-banner">
+
       <div class="hero-overlay" [routerLink]="['/movie', movie?.id]"></div>
+
       <img *ngIf="movie?.backdrop_path" [src]="'https://image.tmdb.org/t/p/original' + movie?.backdrop_path" class="hero-img">
 
+
+
       <div class="hero-content">
+
         <h1 class="hero-title">{{ movie?.titulo }}</h1>
+
         <p class="hero-tagline text-warning mb-2" *ngIf="movie?.tagline">"{{ movie?.tagline }}"</p>
+
         <p class="hero-description d-none d-md-block">
+
           {{ movie?.sinopse | slice:0:220 }}{{ (movie?.sinopse?.length ?? 0) > 220 ? '...' : '' }}
+
         </p>
+
+
+
         <div class="hero-buttons mt-3">
+
           <button class="btn btn-light btn-lg me-2 fw-bold" [routerLink]="['/movie', movie?.id]">▶ Assistir</button>
+
           <button class="btn btn-outline-light btn-lg fw-bold" [routerLink]="['/movie', movie?.id]">
+
             <i class="bi bi-info-circle"></i> Mais Informações
+
           </button>
+
         </div>
+
       </div>
+
     </div>
 
+
+
     <div class="hero-dots">
+
       <div *ngFor="let movie of heroMovies; let i = index"
+
            class="dot"
+
            [class.active]="i === currentHeroIndex"
-           (click)="goToHero(i)">
+
+           (click)="$event.stopPropagation(); goToHero(i)">
+
       </div>
+
     </div>
+
   </div>
+
+
 
   <div *ngIf="searchTerm" class="search-results-container">
     <h2 class="genre-title mb-4">Resultados para: "{{ searchTerm }}"</h2>
-    <div class="results-grid px-4">
-      <div *ngFor="let movie of allMoviesResults | slice:0:getLimit('search'); trackBy: trackByMovieId"
-           class="movie-card"
-           [routerLink]="['/movie', movie.id]">
-        <div class="poster-wrapper shadow-lg">
-          <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster" loading="lazy">
-        </div>
-        <p class="movie-name">{{ movie.titulo }}</p>
-      </div>
 
+    <div class="results-grid px-4">
+      <!-- Cards dos Filmes -->
+      <app-movie-card
+        *ngFor="let movie of allMoviesResults | slice:0:getLimit('search'); trackBy: trackByMovieId"
+        [movie]="movie">
+      </app-movie-card>
+
+      <!-- ✅ BOTÃO "VER MAIS" ESTILIZADO IGUAL À ROW -->
       <div *ngIf="allMoviesResults.length > getLimit('search')"
-           class="movie-card load-more-card"
+           class="load-more-card search-mode"
            (click)="loadMore('search')">
         <div class="load-more-content">
           <i class="bi bi-plus-circle"></i>
@@ -51,47 +82,40 @@
     </div>
   </div>
 
+
+
   <div *ngIf="!searchTerm && movieGroups.length > 0">
 
-    <div class="genre-section mb-5" *ngIf="watchedMovies.length > 0">
-      <h2 class="genre-title ms-4 mb-3">
-        <i class="bi bi-arrow-counterclockwise text-success me-2"></i> Assista Novamente
-      </h2>
-      <div class="movie-row">
-        <div *ngFor="let movie of watchedMovies; trackBy: trackByMovieId"
-             class="movie-card watched-card"
-             [routerLink]="['/movie', movie.id]">
-          <div class="poster-wrapper shadow-lg">
-            <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster" loading="lazy">
-          </div>
-          <p class="movie-name">{{ movie.titulo }}</p>
-        </div>
-      </div>
-    </div>
 
-    <ng-container *ngFor="let group of movieGroups">
-      <div class="genre-section mb-5">
-        <h2 class="genre-title ms-4 mb-3">{{ group.nome_genero }}</h2>
-        <div class="movie-row">
-          <div *ngFor="let movie of group.filmes | slice:0:getLimit(group.nome_genero); trackBy: trackByMovieId"
-               class="movie-card"
-               [routerLink]="['/movie', movie.id]">
-            <div class="poster-wrapper shadow-lg">
-              <img [src]="'https://image.tmdb.org/t/p/w342' + movie.poster_path" class="movie-poster" loading="lazy">
-            </div>
-            <p class="movie-name">{{ movie.titulo }}</p>
-          </div>
 
-          <div *ngIf="group.filmes.length > getLimit(group.nome_genero)"
-               class="movie-card load-more-card"
-               (click)="loadMore(group.nome_genero)">
-            <div class="load-more-content">
-              <i class="bi bi-plus-circle"></i>
-              <span>Ver mais</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ng-container>
+    <app-movie-row
+
+      *ngIf="watchedMovies.length > 0"
+
+      title="Assista Novamente"
+
+      icon="bi-arrow-counterclockwise"
+
+      [movies]="watchedMovies">
+
+    </app-movie-row>
+
+
+
+    <app-movie-row
+
+      *ngFor="let group of movieGroups"
+
+      [title]="group.nome_genero"
+
+      [movies]="group.filmes | slice:0:getLimit(group.nome_genero)"
+
+      [showLoadMore]="group.filmes.length > getLimit(group.nome_genero)"
+
+      (onLoadMore)="loadMore(group.nome_genero)">
+
+    </app-movie-row>
+
   </div>
+
 </div>

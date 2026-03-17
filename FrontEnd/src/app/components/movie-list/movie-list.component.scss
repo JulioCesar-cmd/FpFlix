@@ -103,108 +103,39 @@
   }
 }
 
-/* ✅ TÍTULOS DE SEÇÃO */
-.genre-title {
-  color: #ffffff;
-  font-weight: bold;
-  border-left: 5px solid #00a859;
-  padding-left: 15px;
-  text-transform: uppercase;
-  margin-left: 4%;
-  margin-top: 40px;
-  i { vertical-align: middle; }
+/* ✅ RESULTADOS DA BUSCA (Ajustado) */
+.search-results-container {
+  padding-top: 120px;
+  min-height: 80vh;
+
+  .results-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px; /* Aumentado para o zoom não cortar */
+    justify-content: flex-start; /* Alinhado à esquerda como um catálogo */
+    padding: 20px 4%;
+  }
 }
 
-/* ✅ FILEIRAS DE FILMES */
-.movie-row {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  padding: 40px 4% 50px;
-  margin-top: -20px;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
-}
-
-/* ✅ CARD COM EFEITO ZOOM */
-.movie-card {
+/* ✅ BOTÃO VER MAIS (Estilo Row aplicado na Busca) */
+.load-more-card {
   flex: 0 0 auto;
   width: 170px;
-  cursor: pointer;
-  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  z-index: 1;
-
-  &.watched-card {
-    opacity: 0.6;
-    &:hover { opacity: 1; }
-  }
-
-  .poster-wrapper {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid #004a23;
-    height: 250px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    transition: all 0.45s ease;
-
-    .movie-poster {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s ease;
-    }
-  }
-
-  &:hover {
-    transform: scale(1.15) translateY(-10px);
-    z-index: 100;
-
-    .poster-wrapper {
-      border-color: #00a859;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-      .movie-poster { filter: brightness(1.1); }
-    }
-
-    .movie-name {
-      color: #00a859;
-      white-space: normal;
-      font-weight: 700;
-    }
-  }
-
-  .movie-name {
-    color: #ffffff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-top: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: all 0.3s ease;
-    text-align: center;
-  }
-}
-
-/* ✅ CARD "VER MAIS" */
-.load-more-card {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 250px;
   background: rgba(0, 168, 89, 0.05);
   border: 2px dashed rgba(0, 168, 89, 0.3) !important;
   border-radius: 12px;
-  height: 250px;
-  width: 170px;
-  margin-right: 40px;
-  flex: 0 0 auto;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   .load-more-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     color: #00a859;
-    font-weight: bold;
     gap: 10px;
 
     i {
@@ -213,6 +144,7 @@
     }
     span {
       font-size: 0.8rem;
+      font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -220,25 +152,24 @@
 
   &:hover {
     background: rgba(0, 168, 89, 0.15);
-    border-color: #00ff84 !important;
-    transform: scale(1.1) !important;
+    border: 2px solid #00ff84 !important;
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
 
-    .load-more-content i {
-      transform: rotate(90deg);
-      color: #00ff84;
+    .load-more-content {
+      color: #fff;
+      i { transform: rotate(90deg); color: #00ff84; }
     }
-    span { color: #fff; }
   }
 }
 
-/* ✅ RESULTADOS DA BUSCA */
-.search-results-container {
-  padding-top: 100px;
-  min-height: 80vh;
-
-  .results-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
+/* Título dos Gêneros na Home */
+.genre-title {
+  padding-left: 4%;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-left: 5px solid #00a859;
+  margin-left: 4%;
+  margin-bottom: 20px;
 }

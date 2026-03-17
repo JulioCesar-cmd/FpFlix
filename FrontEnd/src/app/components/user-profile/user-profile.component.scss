@@ -1,85 +1,48 @@
 .profile-wrapper {
   background-color: #000d07;
   min-height: 100vh;
-  padding-top: 100px;
-  color: white;
+  padding-top: 80px; // Espaço para o seu Navbar fixo
 }
 
-.avatar-giant {
-  width: 110px; height: 110px;
-  background: #00a859;
-  border-radius: 50%;
-  margin: 0 auto;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 3rem; font-weight: 800;
-  box-shadow: 0 0 25px rgba(0, 168, 89, 0.3);
+.profile-header {
+  background: linear-gradient(to bottom, rgba(0, 168, 89, 0.15), transparent);
+  padding: 60px 0;
+  border-bottom: 1px solid rgba(0, 168, 89, 0.1);
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    background-color: #00a859;
+    color: #000d07;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 800;
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(0, 168, 89, 0.3);
+  }
+
+  .text-green { color: #00a859; }
 }
 
-.badge-status, .badge-level {
-  padding: 5px 15px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
+.section-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-left: 5px solid #00a859;
+  padding-left: 15px;
+  margin-bottom: 25px;
+  margin-left: 4%;
 }
 
-.badge-status { background: rgba(255, 255, 255, 0.1); }
-.badge-level { background: rgba(0, 168, 89, 0.2); color: #00ff84; border: 1px solid #00a859; }
-
-.stat-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 40px;
-  text-align: center;
-  i { font-size: 2rem; color: #00a859; }
-  h3 { font-size: 2.5rem; font-weight: 800; margin: 10px 0; }
-  p { color: rgba(255, 255, 255, 0.5); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
-
-  &.featured { border-color: #00a859; background: rgba(0, 168, 89, 0.05); }
-}
-
-/* ✅ CORREÇÃO DOS MINI CARDS DE SUGESTÃO (Sem cortes) */
-.movie-mini-card {
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  border-radius: 12px;
-  border: 2px solid transparent; // Borda invisível por padrão
-  background: rgba(255, 255, 255, 0.03); // Fundo leve para o loading
-
+/* Customização para o botão de sair */
+.btn-outline-danger {
+  border-color: rgba(220, 53, 69, 0.5);
   &:hover {
-    transform: scale(1.05) translateY(-5px);
-    border-color: #00a859; // Borda brilha no hover
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
-
-    .mini-overlay {
-      opacity: 1;
-    }
-  }
-
-  img {
-    display: block; // Remove espaços em branco indesejados
-    width: 100%; // Preenche a largura da coluna
-    height: auto; // ✅ Altura automática para manter proporção (Sem cortes)
-    object-fit: contain; // Garante que a imagem inteira caiba (segurança)
-    border-radius: 10px; // Acompanha o container
-  }
-
-  .mini-overlay {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    // Gradiente começando transparente para não cobrir o poster
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 20%, transparent);
-    padding: 20px 10px 10px;
-    opacity: 0; // Só aparece no hover
-    transition: opacity 0.3s ease;
-    border-radius: 0 0 10px 10px;
-
-    span {
-      font-weight: bold;
-      font-size: 0.85rem;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-    }
+    background-color: #dc3545;
+    border-color: #dc3545;
   }
 }

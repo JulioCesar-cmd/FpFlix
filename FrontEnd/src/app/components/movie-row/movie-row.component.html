@@ -1,0 +1,22 @@
+<div class="genre-section">
+  <h2 class="genre-title">
+    <i *ngIf="icon" [class]="icon + ' text-success me-2'"></i>
+    {{ title }}
+  </h2>
+
+  <!-- Este é o contêiner que MANDA no alinhamento -->
+  <div class="movie-row-container">
+
+    <!-- Renderiza os cards um do lado do outro -->
+    <app-movie-card *ngFor="let m of movies" [movie]="m"></app-movie-card>
+
+    <!-- O botão "Ver Mais" entra como o último item da linha -->
+    <div *ngIf="showLoadMore" class="load-more-card" (click)="triggerLoadMore()">
+      <div class="load-more-content">
+        <i class="bi bi-plus-circle"></i>
+        <span>Ver mais</span>
+      </div>
+    </div>
+
+  </div>
+</div>

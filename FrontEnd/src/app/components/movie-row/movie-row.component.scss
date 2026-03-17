@@ -1,0 +1,76 @@
+.genre-section {
+  margin-bottom: 2rem;
+  overflow: hidden; // Evita barras de rolagem estranhas no layout pai
+}
+
+/* ✅ O PAI QUE MANTÉM TUDO NA HORIZONTAL */
+.movie-row-container {
+  display: flex;
+  gap: 20px;
+  /* ⬇️ Aumente o padding superior e inferior para o zoom ter espaço */
+  padding: 40px 4%;
+
+  /* ⬇️ Mantenha o scroll, mas garanta que o alinhamento vertical seja visível */
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: visible; /* 👈 CRUCIAL: permite que o card "saia" para cima/baixo */
+
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Força o componente Angular a não cortar o conteúdo dos filhos */
+:host {
+  display: block;
+  overflow: visible;
+}
+
+/* ✅ ESTILO DO BOTÃO "VER MAIS" */
+.load-more-card {
+  flex: 0 0 auto;      /* IMPORTANTE: Impede que o botão encolha */
+  width: 170px;
+  height: 250px;       /* Ajuste para a mesma altura da sua cartela */
+  background: rgba(0, 168, 89, 0.05);
+  border: 2px dashed rgba(0, 168, 89, 0.3) !important;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.4s ease;
+  margin-right: 50px;  /* Espaço final da fileira */
+
+  .load-more-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #00a859;
+    gap: 8px;
+
+    i {
+      font-size: 2.5rem;
+    }
+    span {
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }
+
+  &:hover {
+    background: rgba(0, 168, 89, 0.15);
+    border: 2px solid #00ff84 !important;
+    transform: scale(1.05);
+
+    .load-more-content {
+      color: #fff;
+      i { transform: rotate(90deg); color: #00ff84; transition: 0.3s; }
+    }
+  }
+}
+
+/* Garante que o seletor do componente não quebre o flex */
+:host {
+  display: block;
+  width: 100%;
+}
